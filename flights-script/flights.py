@@ -133,16 +133,6 @@ async def scrape(origin: str, destination: str, date: str, currency: str) -> lis
                 details = await main.get_attribute("aria-label") if main else None
                 info = parse_flight_info(details or "")
 
-                co2_el = await el.query_selector('[data-co2currentflight]')
-                co2 = None
-                if co2_el:
-                    def _int(v): return int(v) if v else None
-                    co2 = {
-                        'current_kg': _int(await co2_el.get_attribute("data-co2currentflight")),
-                        'typical_kg': _int(await co2_el.get_attribute("data-co2typical")),
-                        'percent_diff': _int(await co2_el.get_attribute("data-percentagediff")),
-                    }
-
                 results.append({
                     'price_raw': price_raw,
                     'price': parse_price(price_raw or ''),
@@ -161,7 +151,6 @@ async def scrape(origin: str, destination: str, date: str, currency: str) -> lis
                         'time': info.get('arrival_time'),
                     },
                     'duration': info.get('duration'),
-                    'co2': co2,
                 })
             except Exception:
                 continue
