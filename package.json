@@ -1,0 +1,22 @@
+{
+  "name": "0x-flights",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:api": "bun run --cwd apps/api dev",
+    "dev:bot": "bun run --cwd apps/bot dev",
+    "dev:worker-prices": "bun run --cwd apps/worker-prices dev",
+    "dev:worker-notifications": "bun run --cwd apps/worker-notifications dev",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  }
+}
