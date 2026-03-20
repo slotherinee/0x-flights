@@ -1,4 +1,9 @@
-export { upsertUserByTelegramId, findUserByTelegramId } from './user-repository'
+export {
+  upsertUserByTelegramId,
+  findUserByTelegramId,
+  findUserLanguageByTelegramId,
+  saveUserLanguageByTelegramId,
+} from './user-repository'
 export {
   createTrackerForUser,
   findTrackersByUserId,

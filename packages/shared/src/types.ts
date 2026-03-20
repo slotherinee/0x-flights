@@ -1,6 +1,9 @@
+export type UserLanguage = 'en' | 'ru'
+
 export interface User {
   id: number
   telegramId: string
+  language: UserLanguage
   username: string | null
   firstName: string | null
   lastName: string | null

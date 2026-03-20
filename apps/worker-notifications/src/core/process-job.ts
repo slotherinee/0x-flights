@@ -1,13 +1,21 @@
 import type TelegramBot from 'node-telegram-bot-api'
 import type { Job } from 'bullmq'
-import { createNotification, markNotificationsSent } from '@0x-flights/db'
-import type { NotificationJob } from '@0x-flights/shared'
-import { buildNotificationMessage } from './build-message'
+import {
+  createNotification,
+  getUserLanguageByTelegramId,
+  markNotificationsSent,
+} from '@0x-flights/db'
+import {
+  buildLocalizedNotificationMessage,
+  normalizeLanguage,
+  type NotificationJob,
+} from '@0x-flights/shared'
 
 export function createJobProcessor(bot: TelegramBot) {
   return async function processJob(job: Job<NotificationJob>): Promise<void> {
     const data = job.data
-    const message = buildNotificationMessage(data)
+    const userLang = await getUserLanguageByTelegramId(data.telegramId)
+    const message = buildLocalizedNotificationMessage(data, normalizeLanguage(userLang))
 
     const notification = await createNotification({
       trackerId: data.trackerId,

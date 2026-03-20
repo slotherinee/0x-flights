@@ -3,6 +3,7 @@ import { env } from '@0x-flights/config'
 import { closeRedis } from './state/conversation'
 import {
   handleStart,
+  handleLang,
   handleTrack,
   handleCancel,
   handleList,
@@ -15,6 +16,7 @@ const bot = new TelegramBot(env.TELEGRAM_BOT_TOKEN, { polling: true })
 console.log('🤖 Bot started (polling)')
 
 bot.onText(/^\/start/, (msg) => handleStart(bot, msg).catch(console.error))
+bot.onText(/^\/lang/, (msg) => handleLang(bot, msg).catch(console.error))
 bot.onText(/^\/track/, (msg) => handleTrack(bot, msg).catch(console.error))
 bot.onText(/^\/cancel/, (msg) => handleCancel(bot, msg).catch(console.error))
 bot.onText(/^\/list/, (msg) => handleList(bot, msg).catch(console.error))

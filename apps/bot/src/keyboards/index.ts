@@ -4,11 +4,11 @@ export const cancelKeyboard: TelegramBot.InlineKeyboardMarkup = {
   inline_keyboard: [[{ text: '❌ Cancel', callback_data: 'cancel' }]],
 }
 
-export const roundTripKeyboard: TelegramBot.InlineKeyboardMarkup = {
+export const languageKeyboard: TelegramBot.InlineKeyboardMarkup = {
   inline_keyboard: [
     [
-      { text: '🔁 Round trip', callback_data: 'trip:round' },
-      { text: '➡️ One way', callback_data: 'trip:one' },
+      { text: '🇬🇧 EN', callback_data: 'lang:en' },
+      { text: '🇷🇺 RU', callback_data: 'lang:ru' },
     ],
   ],
 }

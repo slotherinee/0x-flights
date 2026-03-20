@@ -1,13 +1,14 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../client'
 import { users } from '../schema'
-import type { User } from '@0x-flights/shared'
+import type { User, UserLanguage } from '@0x-flights/shared'
 
 type Row = typeof users.$inferSelect
 
 const toUser = (r: Row): User => ({
   id: r.id,
   telegramId: r.telegramId,
+  language: (r.language.trim().toLowerCase() as UserLanguage) || 'en',
   username: r.username,
   firstName: r.firstName,
   lastName: r.lastName,
@@ -16,6 +17,7 @@ const toUser = (r: Row): User => ({
 
 export async function upsertUser(data: {
   telegramId: string
+  language?: UserLanguage
   username?: string | null
   firstName?: string | null
   lastName?: string | null
@@ -24,6 +26,7 @@ export async function upsertUser(data: {
     .insert(users)
     .values({
       telegramId: data.telegramId,
+      language: data.language ?? 'en',
       username: data.username ?? null,
       firstName: data.firstName ?? null,
       lastName: data.lastName ?? null,
@@ -34,6 +37,7 @@ export async function upsertUser(data: {
         username: data.username ?? null,
         firstName: data.firstName ?? null,
         lastName: data.lastName ?? null,
+        ...(data.language ? { language: data.language } : {}),
       },
     })
     .returning()
@@ -43,4 +47,29 @@ export async function upsertUser(data: {
 export async function getUserByTelegramId(telegramId: string): Promise<User | null> {
   const [row] = await getDb().select().from(users).where(eq(users.telegramId, telegramId))
   return row ? toUser(row) : null
+}
+
+export async function getUserLanguageByTelegramId(telegramId: string): Promise<UserLanguage | null> {
+  const [row] = await getDb()
+    .select({ language: users.language })
+    .from(users)
+    .where(eq(users.telegramId, telegramId))
+  if (!row) return null
+  const lang = row.language.trim().toLowerCase()
+  return lang === 'ru' ? 'ru' : 'en'
+}
+
+export async function setUserLanguageByTelegramId(
+  telegramId: string,
+  language: UserLanguage,
+): Promise<UserLanguage> {
+  await getDb()
+    .insert(users)
+    .values({ telegramId, language })
+    .onConflictDoUpdate({
+      target: users.telegramId,
+      set: { language },
+    })
+
+  return language
 }

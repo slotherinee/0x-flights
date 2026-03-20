@@ -1,0 +1,2 @@
+ALTER TABLE "users"
+ADD COLUMN IF NOT EXISTS "language" char(2) NOT NULL DEFAULT 'en';

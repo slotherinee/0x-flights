@@ -5,15 +5,20 @@ import { Redis } from 'ioredis'
 import { getRedisConfig } from '@0x-flights/config'
 
 export type TrackStep =
-  | 'AWAITING_ORIGIN'
-  | 'AWAITING_DESTINATION'
+  | 'AWAITING_LANGUAGE'
+  | 'AWAITING_ORIGIN_CITY'
+  | 'AWAITING_DESTINATION_CITY'
   | 'AWAITING_DATE'
   | 'AWAITING_THRESHOLD'
 
 export interface ConversationState {
   step: TrackStep
+  intent?: 'start' | 'track'
+  lang?: 'en' | 'ru'
   origin?: string
   destination?: string
+  originCity?: string
+  destinationCity?: string
   departureDate?: string
 }
 
