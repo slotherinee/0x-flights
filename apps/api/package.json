@@ -13,6 +13,7 @@
     "@0x-flights/shared": "*",
     "elysia": "^1.1.0",
     "@elysiajs/swagger": "^1.1.0",
+    "drizzle-orm": "^0.31.0",
     "handlebars": "^4.7.8",
     "ioredis": "^5.8.2"
   }

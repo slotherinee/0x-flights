@@ -1,7 +1,6 @@
 services:
 
-  # ─── Infrastructure ─────────────────────────────────────────────────────────
-
+  # ─── Infrastructure services
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -28,7 +27,7 @@ services:
       timeout: 5s
       retries: 10
 
-  # ─── App services ────────────────────────────────────────────────────────────
+  # ─── Application services
 
   api:
     build:
@@ -38,6 +37,11 @@ services:
     env_file: .env
     ports:
       - '${API_PORT:-3000}:3000'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
+      interval: 10s
+      timeout: 5s
+      retries: 6
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,7 +57,8 @@ services:
     environment:
       - API_BASE_URL=http://api:3000
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
   worker-prices:
     build:
@@ -74,6 +79,8 @@ services:
     restart: unless-stopped
     env_file: .env
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
 
