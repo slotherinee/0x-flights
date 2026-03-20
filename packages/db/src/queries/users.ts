@@ -22,10 +22,19 @@ export async function upsertUser(data: {
 }): Promise<User> {
   const [row] = await getDb()
     .insert(users)
-    .values({ telegramId: data.telegramId, username: data.username ?? null, firstName: data.firstName ?? null, lastName: data.lastName ?? null })
+    .values({
+      telegramId: data.telegramId,
+      username: data.username ?? null,
+      firstName: data.firstName ?? null,
+      lastName: data.lastName ?? null,
+    })
     .onConflictDoUpdate({
       target: users.telegramId,
-      set: { username: data.username ?? null, firstName: data.firstName ?? null, lastName: data.lastName ?? null },
+      set: {
+        username: data.username ?? null,
+        firstName: data.firstName ?? null,
+        lastName: data.lastName ?? null,
+      },
     })
     .returning()
   return toUser(row!)

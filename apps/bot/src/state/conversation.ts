@@ -8,7 +8,6 @@ export type TrackStep =
   | 'AWAITING_ORIGIN'
   | 'AWAITING_DESTINATION'
   | 'AWAITING_DATE'
-  | 'AWAITING_RETURN_DATE'
   | 'AWAITING_THRESHOLD'
 
 export interface ConversationState {
@@ -16,8 +15,6 @@ export interface ConversationState {
   origin?: string
   destination?: string
   departureDate?: string
-  returnDate?: string
-  isRoundTrip?: boolean
 }
 
 const TTL = 600 // 10 minutes
@@ -45,5 +42,8 @@ export const clearState = async (chatId: number): Promise<void> => {
 }
 
 export const closeRedis = async (): Promise<void> => {
-  if (_redis) { await _redis.quit(); _redis = null }
+  if (_redis) {
+    await _redis.quit()
+    _redis = null
+  }
 }

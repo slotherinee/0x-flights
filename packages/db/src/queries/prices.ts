@@ -17,12 +17,14 @@ export async function insertPricesBatch(
   records: { trackerId: number; price: number; currency: string; source?: string }[],
 ): Promise<void> {
   if (!records.length) return
-  await getDb().insert(prices).values(
-    records.map((r) => ({
-      trackerId: r.trackerId,
-      price: String(r.price),
-      currency: r.currency,
-      source: r.source ?? 'stub',
-    })),
-  )
+  await getDb()
+    .insert(prices)
+    .values(
+      records.map((r) => ({
+        trackerId: r.trackerId,
+        price: String(r.price),
+        currency: r.currency,
+        source: r.source ?? 'stub',
+      })),
+    )
 }

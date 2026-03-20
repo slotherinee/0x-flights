@@ -17,12 +17,7 @@ export class GoogleFlightsProvider implements FlightProvider {
 
   async searchFlights(params: FlightSearchParams): Promise<FlightSearchResult | null> {
     const currency = params.currency ?? 'EUR'
-    const args = [
-      params.origin,
-      params.destination,
-      params.departureDate,
-      currency,
-    ]
+    const args = [params.origin, params.destination, params.departureDate, currency]
 
     let stdout = ''
     let stderr = ''

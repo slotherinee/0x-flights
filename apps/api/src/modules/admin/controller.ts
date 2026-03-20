@@ -1,12 +1,7 @@
 import { Elysia } from 'elysia'
 import { adminAuthMiddleware } from './auth'
 import { renderAdminPage } from './view'
-import {
-  getAdminPageData,
-  runPriceWorkerNow,
-  deactivateTrackerById,
-  banUserById,
-} from './service'
+import { getAdminPageData, runPriceWorkerNow, deactivateTrackerById, banUserById } from './service'
 
 export const adminRoutes = new Elysia({ prefix: '/adminpage' })
   .use(adminAuthMiddleware)

@@ -1,5 +1,5 @@
 import type TelegramBot from 'node-telegram-bot-api'
-import { getState, setState, clearState } from '../state/conversation'
+import { clearState } from '../state/conversation'
 import { handleDeleteAsk, handleDeleteConfirm } from './commands'
 
 export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.CallbackQuery) {
@@ -10,25 +10,6 @@ export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.C
 
   await bot.answerCallbackQuery(query.id)
   if (!chatId || !msgId) return
-
-  // trip type buttons (inside /track flow)
-  if (data === 'trip:round') {
-    const state = await getState(chatId)
-    if (!state) return
-    await setState(chatId, { ...state, step: 'AWAITING_RETURN_DATE', isRoundTrip: true })
-    await bot.editMessageText('📅 Enter *return date* (YYYY-MM-DD):',
-      { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown' })
-    return
-  }
-
-  if (data === 'trip:one') {
-    const state = await getState(chatId)
-    if (!state) return
-    await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', isRoundTrip: false })
-    await bot.editMessageText('💰 Enter *max price* (e.g. `350`):',
-      { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown' })
-    return
-  }
 
   // delete flow
   if (data.startsWith('del_ask:')) {

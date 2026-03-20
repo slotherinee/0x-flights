@@ -11,7 +11,6 @@ const toTracker = (r: Row): Tracker => ({
   origin: r.origin.trim(),
   destination: r.destination.trim(),
   departureDate: r.departureDate,
-  returnDate: r.returnDate ?? null,
   priceThreshold: Number(r.priceThreshold),
   currency: r.currency.trim(),
   adults: r.adults,
@@ -31,7 +30,6 @@ export async function createTracker(
       origin: dto.origin.toUpperCase(),
       destination: dto.destination.toUpperCase(),
       departureDate: dto.departureDate,
-      returnDate: dto.returnDate ?? null,
       priceThreshold: String(dto.priceThreshold),
       currency: (dto.currency ?? 'USD').toUpperCase(),
       adults: dto.adults ?? 1,
@@ -49,14 +47,20 @@ export async function getTrackersByUserId(userId: number): Promise<TrackerRespon
         WHERE p.tracker_id = ${trackers.id}
         ORDER BY p.fetched_at DESC LIMIT 1
       )`,
+      latestPriceCurrency: sql<string | null>`(
+        SELECT p.currency FROM prices p
+        WHERE p.tracker_id = ${trackers.id}
+        ORDER BY p.fetched_at DESC LIMIT 1
+      )`,
     })
     .from(trackers)
     .where(and(eq(trackers.userId, userId), eq(trackers.isActive, true)))
     .orderBy(desc(trackers.createdAt))
 
-  return rows.map(({ tracker, latestPrice }) => ({
+  return rows.map(({ tracker, latestPrice, latestPriceCurrency }) => ({
     ...toTracker(tracker),
     latestPrice: latestPrice != null ? Number(latestPrice) : null,
+    latestPriceCurrency: latestPriceCurrency != null ? latestPriceCurrency.trim() : null,
   }))
 }
 

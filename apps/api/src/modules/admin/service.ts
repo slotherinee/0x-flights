@@ -9,14 +9,15 @@ import {
 import { deactivateTracker, banUser, triggerPriceWorkerRunNow } from './repository'
 
 export async function getAdminPageData() {
-  const [stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs] = await Promise.all([
-    getStats(),
-    getPriceWorkerStatus(),
-    getAllUsers(),
-    getAllTrackers(),
-    getRecentPrices(),
-    getRecentNotifications(),
-  ])
+  const [stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs] =
+    await Promise.all([
+      getStats(),
+      getPriceWorkerStatus(),
+      getAllUsers(),
+      getAllTrackers(),
+      getRecentPrices(),
+      getRecentNotifications(),
+    ])
 
   return { stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs }
 }

@@ -13,7 +13,6 @@ export interface Tracker {
   origin: string
   destination: string
   departureDate: string
-  returnDate: string | null
   priceThreshold: number
   currency: string
   adults: number
@@ -24,6 +23,7 @@ export interface Tracker {
 
 export interface TrackerResponse extends Tracker {
   latestPrice?: number | null
+  latestPriceCurrency?: string | null
 }
 
 export interface Price {
@@ -63,7 +63,6 @@ export interface CreateTrackerDto {
   origin: string
   destination: string
   departureDate: string
-  returnDate?: string
   priceThreshold: number
   currency?: string
   adults?: number

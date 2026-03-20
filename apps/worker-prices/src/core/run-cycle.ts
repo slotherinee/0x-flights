@@ -25,7 +25,12 @@ async function markLastRun(redis: Redis) {
   await redis.set(LAST_RUN_KEY, new Date().toISOString())
 }
 
-function toNotificationJob(tracker: Tracker, telegramId: string, price: number, currency: string): NotificationJob {
+function toNotificationJob(
+  tracker: Tracker,
+  telegramId: string,
+  price: number,
+  currency: string,
+): NotificationJob {
   return {
     trackerId: tracker.id,
     userId: tracker.userId,
@@ -39,7 +44,11 @@ function toNotificationJob(tracker: Tracker, telegramId: string, price: number, 
   }
 }
 
-export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCycleDeps): Promise<void> {
+export async function runPriceCycle({
+  provider,
+  redis,
+  notifQueue,
+}: RunPriceCycleDeps): Promise<void> {
   console.log(`[PriceWorker] Cycle start - provider: ${provider.name}`)
 
   const trackers = await getActiveTrackers()
@@ -66,7 +75,6 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
         origin: sample.origin,
         destination: sample.destination,
         departureDate: sample.departureDate,
-        returnDate: sample.returnDate,
         adults: sample.adults,
         currency: sample.currency,
       })
@@ -93,7 +101,9 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
       if (result.lowestPrice <= tracker.priceThreshold) {
         const telegramId = userMap.get(tracker.userId)
         if (!telegramId) continue
-        notificationJobs.push(toNotificationJob(tracker, telegramId, result.lowestPrice, result.currency))
+        notificationJobs.push(
+          toNotificationJob(tracker, telegramId, result.lowestPrice, result.currency),
+        )
       }
     }
   }

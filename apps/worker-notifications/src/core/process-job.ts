@@ -20,6 +20,8 @@ export function createJobProcessor(bot: TelegramBot) {
     await bot.sendMessage(data.telegramId, message, { parse_mode: 'Markdown' })
     await markNotificationsSent([notification.id])
 
-    console.log(`[NotifWorker] Sent to ${data.telegramId}: ${data.origin}->${data.destination} @ ${data.price} ${data.currency}`)
+    console.log(
+      `[NotifWorker] Sent to ${data.telegramId}: ${data.origin}->${data.destination} @ ${data.price} ${data.currency}`,
+    )
   }
 }

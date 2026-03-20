@@ -1,0 +1,1 @@
+ALTER TABLE "trackers" DROP COLUMN IF EXISTS "return_date";

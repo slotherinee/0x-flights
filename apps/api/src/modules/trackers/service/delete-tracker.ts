@@ -1,7 +1,10 @@
 import { findUserByTelegramId, softDeleteTrackerForUser } from '../repository'
 import type { DeleteTrackerResult } from '../types'
 
-export async function deleteTrackerByTelegramId(trackerId: number, telegramId: string): Promise<DeleteTrackerResult> {
+export async function deleteTrackerByTelegramId(
+  trackerId: number,
+  telegramId: string,
+): Promise<DeleteTrackerResult> {
   const user = await findUserByTelegramId(telegramId)
   if (!user) return { ok: false, reason: 'USER_NOT_FOUND' }
 

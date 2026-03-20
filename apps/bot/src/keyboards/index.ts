@@ -5,15 +5,19 @@ export const cancelKeyboard: TelegramBot.InlineKeyboardMarkup = {
 }
 
 export const roundTripKeyboard: TelegramBot.InlineKeyboardMarkup = {
-  inline_keyboard: [[
-    { text: '🔁 Round trip', callback_data: 'trip:round' },
-    { text: '➡️ One way', callback_data: 'trip:one' },
-  ]],
+  inline_keyboard: [
+    [
+      { text: '🔁 Round trip', callback_data: 'trip:round' },
+      { text: '➡️ One way', callback_data: 'trip:one' },
+    ],
+  ],
 }
 
 export const deleteConfirmKeyboard = (id: number): TelegramBot.InlineKeyboardMarkup => ({
-  inline_keyboard: [[
-    { text: '🗑 Delete', callback_data: `del_confirm:${id}` },
-    { text: '⬅️ Keep', callback_data: 'del_cancel' },
-  ]],
+  inline_keyboard: [
+    [
+      { text: '🗑 Delete', callback_data: `del_confirm:${id}` },
+      { text: '⬅️ Keep', callback_data: 'del_cancel' },
+    ],
+  ],
 })

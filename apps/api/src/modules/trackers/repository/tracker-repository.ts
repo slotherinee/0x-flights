@@ -1,7 +1,10 @@
 import { createTracker, getTrackersByUserId, softDeleteTracker } from '@0x-flights/db'
 import type { CreateTrackerDto } from '@0x-flights/shared'
 
-export async function createTrackerForUser(userId: number, dto: Omit<CreateTrackerDto, 'telegramId'>) {
+export async function createTrackerForUser(
+  userId: number,
+  dto: Omit<CreateTrackerDto, 'telegramId'>,
+) {
   return createTracker(userId, dto)
 }
 

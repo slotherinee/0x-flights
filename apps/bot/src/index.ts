@@ -1,7 +1,13 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { env } from '@0x-flights/config'
 import { closeRedis } from './state/conversation'
-import { handleStart, handleTrack, handleCancel, handleList, handleDelete } from './handlers/commands'
+import {
+  handleStart,
+  handleTrack,
+  handleCancel,
+  handleList,
+  handleDelete,
+} from './handlers/commands'
 import { handleTextMessage } from './handlers/messages'
 import { handleCallbackQuery } from './handlers/callbacks'
 
