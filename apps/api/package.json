@@ -1,0 +1,17 @@
+{
+  "name": "@0x-flights/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@0x-flights/config": "*",
+    "@0x-flights/db": "*",
+    "@0x-flights/shared": "*",
+    "elysia": "^1.1.0",
+    "@elysiajs/swagger": "^1.1.0"
+  }
+}
