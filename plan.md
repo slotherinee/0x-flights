@@ -2,40 +2,74 @@
 
 ## Stage 1 — Foundation
 - [x] Monorepo root (package.json, tsconfig, eslint, prettier, .gitignore, .env.example)
-- [ ] packages/config — env parsing with Zod
-- [ ] packages/shared — types, Zod schemas, queue names
-- [ ] packages/db — Drizzle schema + migrations + query helpers
+- [x] packages/config — env parsing with Zod
+- [x] packages/shared — types, Zod schemas, queue names
+- [x] packages/db — Drizzle schema + migrations + query helpers
 
 ## Stage 2 — API (Elysia)
-- [ ] Scaffold apps/api
-- [ ] GET /health
-- [ ] POST /trackers
-- [ ] GET /trackers
-- [ ] DELETE /trackers/:id
-- [ ] POST /telegram/webhook
+- [x] Scaffold apps/api
+- [x] GET /health
+- [x] POST /trackers
+- [x] GET /trackers
+- [x] DELETE /trackers/:id
+- [x] POST /telegram/webhook
 
-## Stage 3 — Telegram Bot
-- [ ] Scaffold apps/bot
-- [ ] /start, /cancel commands
-- [ ] /track multi-step flow (Redis state)
-- [ ] /list, /delete commands
-- [ ] Inline keyboards + callback_query handler
+## Stage 3 — Admin page
+- [x] GET /adminpage — stats + trackers + Basic Auth
+- [x] POST /adminpage/trackers/:id/deactivate
+- [ ] Users table + ban (deactivate all user trackers)
+- [ ] Latest price column in trackers table
+- [ ] Notifications log
+- [ ] Worker status (last run timestamp from Redis)
+- [ ] "Run price check now" button (sets Redis trigger flag)
 
-## Stage 4 — Price Worker
+## Stage 4 — Telegram Bot
+- [x] Scaffold apps/bot
+- [x] /start, /cancel commands
+- [x] /track multi-step flow (Redis state)
+- [x] /list, /delete commands
+- [x] Inline keyboards + callback_query handler
+
+## Stage 5 — Price Worker
 - [ ] Scaffold apps/worker-prices
 - [ ] FlightProvider interface + StubProvider
 - [ ] AmadeusProvider (behind interface)
 - [ ] Route-grouping + BullMQ enqueue
+- [ ] Respect Redis force-run trigger flag from admin
+- [ ] Write last-run timestamp to Redis for admin status
 
-## Stage 5 — Notification Worker
+## Stage 6 — Notification Worker
 - [ ] Scaffold apps/worker-notifications
 - [ ] BullMQ consumer
 - [ ] Rate limiting + Telegram send
+- [ ] Priority queue: premium users notified before free users
 
-## Stage 6 — Docker
+## Stage 7 — Docker
 - [ ] docker-compose.yml
 
-## Stage 7 — Tests
+## Stage 8 — Tests
 - [ ] Unit tests: shared schemas
 - [ ] Unit tests: state machine
 - [ ] Integration tests: API endpoints
+
+---
+
+## 🔮 Backlog — Premium tier (future)
+
+### User tiers
+- `plan` column on users table: 'free' | 'premium'
+- Free users: 3 tracker max, notifications at fixed schedule
+- Premium users: unlimited trackers, more frequent notifications, silent night alerts
+
+### Scheduled notifications (Moscow time)
+- Free users:    08:00 MSK + 20:00 MSK (2x per day)
+- Premium users: 08:00 / 12:00 / 16:00 / 20:00 / 00:00 MSK (every 4h, incl. night silent)
+- Notifications sent at schedule time — NOT relative to when tracker was created
+- At each schedule slot: premium batch runs first, then free batch
+- Silent mode flag: if send time is 00:00–08:00 MSK → set disable_notification=true in Telegram API
+
+### Implementation notes
+- Replace setInterval in price worker with cron-like scheduler (node-cron or manual)
+- Add `is_premium` / `plan` field to users table (migration)
+- Notification worker: separate BullMQ queues or job priority for premium vs free
+- Timezone: all scheduling in UTC, convert to MSK (UTC+3) for display/logic
