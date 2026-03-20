@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>0x-flights admin</title>
+  <style>{{{styles}}}</style>
+</head>
+<body>
+  <h1>0x-flights admin</h1>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Users</div><div class="stat-value">{{stats.users}}</div></div>
+    <div class="stat"><div class="stat-label">Active trackers</div><div class="stat-value">{{stats.activeTrackers}}</div></div>
+    <div class="stat"><div class="stat-label">Price checks</div><div class="stat-value">{{stats.priceChecks}}</div></div>
+    <div class="stat"><div class="stat-label">Notifications</div><div class="stat-value">{{stats.notifications}}</div></div>
+  </div>
+
+  <h2>Worker status</h2>
+  <table>
+    <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Force-run flag</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>worker-prices</td>
+        <td>{{workerStatus.lastRunText}}</td>
+        <td>
+          {{#if (eq workerStatus.freshness "ok")}}
+            <span class="badge active">ok</span>
+          {{else}}
+            {{#if (eq workerStatus.freshness "stale")}}
+              <span class="badge off">stale</span>
+            {{else}}
+              <span class="dim">n/a</span>
+            {{/if}}
+          {{/if}}
+        </td>
+        <td>
+          {{#if workerStatus.forcePending}}
+            <span class="badge active">pending</span>
+          {{else}}
+            <span class="dim">no</span>
+          {{/if}}
+        </td>
+        <td>
+          <form method="POST" action="/adminpage/workers/prices/run-now" style="display:inline">
+            <button class="btn btn-blue">Run now</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Users</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Telegram ID</th><th>Username</th><th>Name</th><th>Trackers (all/active)</th><th>Joined</th><th>Action</th></tr></thead>
+    <tbody>
+      {{#if allUsers.length}}
+        {{#each allUsers}}
+          <tr>
+            <td>#{{id}}</td>
+            <td>{{telegramId}}</td>
+            <td>{{username}}</td>
+            <td>{{fullName}}</td>
+            <td>{{trackerCount}} / <span style="color:#4ade80">{{activeTrackerCount}}</span></td>
+            <td>{{joinedDate}}</td>
+            <td>
+              {{#if canBan}}
+                <form method="POST" action="/adminpage/users/{{id}}/ban" style="display:inline">
+                  <button class="btn btn-red" onclick="return confirm('Ban user #{{id}} - deactivate all their trackers?')">Ban</button>
+                </form>
+              {{else}}
+                <span class="dim">-</span>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      {{else}}
+        <tr><td colspan="7" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
+      {{/if}}
+    </tbody>
+  </table>
+
+  <h2>Trackers</h2>
+  <table>
+    <thead><tr><th>ID</th><th>User</th><th>Route</th><th>Date</th><th>Threshold</th><th>Latest price</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {{#if allTrackers.length}}
+        {{#each allTrackers}}
+          <tr class="{{#unless isActive}}inactive{{/unless}}">
+            <td>#{{id}}</td>
+            <td>{{userLabel}}</td>
+            <td><b>{{route}}</b></td>
+            <td>{{departureDate}}</td>
+            <td>{{thresholdText}}</td>
+            <td><span class="price-tag">{{latestPriceText}}</span></td>
+            <td><span class="badge {{#if isActive}}active{{else}}off{{/if}}">{{#if isActive}}active{{else}}off{{/if}}</span></td>
+            <td>
+              {{#if isActive}}
+                <form method="POST" action="/adminpage/trackers/{{id}}/deactivate" style="display:inline">
+                  <button class="btn btn-red" onclick="return confirm('Deactivate #{{id}}?')">Off</button>
+                </form>
+              {{else}}
+                <span class="dim">-</span>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      {{else}}
+        <tr><td colspan="8" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
+      {{/if}}
+    </tbody>
+  </table>
+
+  <h2>Recent price checks</h2>
+  <table>
+    <thead><tr><th>Tracker</th><th>Route</th><th>Price</th><th>Source</th><th>Fetched at</th></tr></thead>
+    <tbody>
+      {{#if recentPrices.length}}
+        {{#each recentPrices}}
+          <tr>
+            <td>#{{trackerId}}</td>
+            <td>{{route}}</td>
+            <td class="price-tag">{{priceText}}</td>
+            <td>{{source}}</td>
+            <td>{{fetchedAt}}</td>
+          </tr>
+        {{/each}}
+      {{else}}
+        <tr><td colspan="5" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
+      {{/if}}
+    </tbody>
+  </table>
+
+  <h2>Notifications log</h2>
+  <table>
+    <thead><tr><th>User</th><th>Route</th><th>Price</th><th>Status</th><th>Created at</th></tr></thead>
+    <tbody>
+      {{#if recentNotifs.length}}
+        {{#each recentNotifs}}
+          <tr>
+            <td>{{userLabel}}</td>
+            <td>{{route}}</td>
+            <td class="price-tag">{{priceText}}</td>
+            <td>
+              {{#if isSent}}
+                <span class="badge active">sent</span>
+              {{else}}
+                <span class="badge off">pending</span>
+              {{/if}}
+            </td>
+            <td>{{createdAt}}</td>
+          </tr>
+        {{/each}}
+      {{else}}
+        <tr><td colspan="5" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
+      {{/if}}
+    </tbody>
+  </table>
+
+  <p class="footer">Loaded {{now}} · <a href="/adminpage">Refresh</a></p>
+</body>
+</html>

@@ -1,26 +1,11 @@
-import { Elysia } from 'elysia'
-import { swagger } from '@elysiajs/swagger'
 import { env } from '@0x-flights/config'
 import { runMigrations, closeDb } from '@0x-flights/db'
-import { healthRoutes } from './routes/health'
-import { trackerRoutes } from './routes/trackers'
-import { telegramRoutes } from './routes/telegram'
-import { adminRoutes } from './routes/admin'
+import { createHttpApp } from './infrastructure/http/create-app.ts'
+import { registerModules } from './infrastructure/http/register-modules.ts'
 
 await runMigrations()
 
-const app = new Elysia()
-  .use(swagger({ path: '/docs' }))
-  .onError(({ error, set }) => {
-    console.error(error)
-    set.status = 500
-    return { error: 'Internal server error' }
-  })
-  .use(healthRoutes)
-  .use(trackerRoutes)
-  .use(telegramRoutes)
-  .use(adminRoutes)
-  .listen(env.API_PORT)
+const app = registerModules(createHttpApp()).listen(env.API_PORT)
 
 console.log(`🚀 API running on http://localhost:${env.API_PORT}`)
 

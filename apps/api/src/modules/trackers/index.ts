@@ -1,0 +1,1 @@
+export { trackerRoutes } from './controller'
