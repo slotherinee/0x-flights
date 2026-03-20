@@ -1,6 +1,16 @@
 import type { AdminPageData, AdminPageViewModel } from '../types'
 import { formatRelativeAge } from './format-relative-age'
 
+const MOSCOW_TZ = 'Europe/Moscow'
+
+function formatMoscowDateTime(value: Date | string | number): string {
+  return new Date(value).toLocaleString('ru-RU', { timeZone: MOSCOW_TZ })
+}
+
+function formatMoscowDate(value: Date | string | number): string {
+  return new Date(value).toLocaleDateString('ru-RU', { timeZone: MOSCOW_TZ })
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
@@ -35,12 +45,12 @@ export function toViewModel(
 
   return {
     styles,
-    now: new Date().toLocaleString(),
+    now: formatMoscowDateTime(new Date()),
     activeTab,
     stats,
     workerStatus: {
       lastRunText: workerStatus.lastRun
-        ? `${new Date(workerStatus.lastRun).toLocaleString()} (${formatRelativeAge(workerStatus.ageMs)})`
+        ? `${formatMoscowDateTime(workerStatus.lastRun)} (${formatRelativeAge(workerStatus.ageMs)})`
         : 'never',
       freshness: workerStatus.freshness,
       forcePending: workerStatus.forcePending,
@@ -52,7 +62,7 @@ export function toViewModel(
       fullName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || '-',
       trackerCount: Number(u.trackerCount ?? 0),
       activeTrackerCount: Number(u.activeTrackerCount ?? 0),
-      joinedDate: new Date(u.createdAt).toLocaleDateString(),
+      joinedDate: formatMoscowDate(u.createdAt),
       canBan: Number(u.activeTrackerCount ?? 0) > 0,
       canUnban: Number(u.trackerCount ?? 0) > 0 && Number(u.activeTrackerCount ?? 0) === 0,
     })),
@@ -72,14 +82,14 @@ export function toViewModel(
       route: `${p.origin?.trim() ?? '?'} -> ${p.destination?.trim() ?? '?'}`,
       priceText: `${p.price} ${p.currency.trim()}`,
       source: p.source,
-      fetchedAt: new Date(p.fetchedAt).toLocaleString(),
+      fetchedAt: formatMoscowDateTime(p.fetchedAt),
     })),
     recentNotifs: notificationsPage.items.map((n) => ({
       userLabel: n.username ? `@${n.username}` : (n.telegramId ?? '-'),
       route: `${n.origin?.trim() ?? '?'} -> ${n.destination?.trim() ?? '?'}`,
       priceText: `${n.price} ${n.currency.trim()}`,
       isSent: Boolean(n.sentAt),
-      createdAt: new Date(n.createdAt).toLocaleString(),
+      createdAt: formatMoscowDateTime(n.createdAt),
     })),
     usersPagination: usersPage.meta,
     trackersPagination: trackersPage.meta,

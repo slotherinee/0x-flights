@@ -6,6 +6,15 @@ import { examples, formatCityLabel, resolveCityToIata } from '../utils'
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 
+function formatMoney(value: number, currency: string, lang: 'en' | 'ru'): string {
+  const locale = lang === 'ru' ? 'ru-RU' : 'en-US'
+  try {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value)
+  } catch {
+    return `${value} ${currency}`
+  }
+}
+
 export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Message) {
   const chatId = msg.chat.id
   const state = await getState(chatId)
@@ -21,6 +30,16 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         lang === 'ru'
           ? 'Выберите язык кнопками EN/RU выше, затем продолжим.'
           : 'Choose language with EN/RU buttons above, then continue.',
+      )
+      break
+    }
+
+    case 'AWAITING_CURRENCY': {
+      await bot.sendMessage(
+        chatId,
+        lang === 'ru'
+          ? 'Выберите валюту кнопками USD/EUR/RUB/GBP выше, затем продолжим.'
+          : 'Choose currency with USD/EUR/RUB/GBP buttons above, then continue.',
       )
       break
     }
@@ -124,7 +143,7 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
           destination: state.destination!,
           departureDate: state.departureDate!,
           priceThreshold: price,
-          currency: 'USD',
+          currency: state.currency ?? 'USD',
           adults: 1,
         })
         await clearState(chatId)
@@ -134,11 +153,11 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
             ? `🎉 *Трекер создан!*\n\n` +
               `✈️ ${state.originCity ?? tracker.origin} → ${state.destinationCity ?? tracker.destination}\n` +
               `📅 ${tracker.departureDate}\n` +
-              `🎯 Уведомление при цене ниже *${tracker.priceThreshold} ${tracker.currency}*`
+              `🎯 Уведомление при цене ниже *${formatMoney(Number(tracker.priceThreshold), tracker.currency, 'ru')}*`
             : `🎉 *Tracker created!*\n\n` +
               `✈️ ${state.originCity ?? tracker.origin} → ${state.destinationCity ?? tracker.destination}\n` +
               `📅 ${tracker.departureDate}\n` +
-              `🎯 Alert below *${tracker.priceThreshold} ${tracker.currency}*`,
+              `🎯 Alert below *${formatMoney(Number(tracker.priceThreshold), tracker.currency, 'en')}*`,
           { parse_mode: 'Markdown' },
         )
       } catch (e) {

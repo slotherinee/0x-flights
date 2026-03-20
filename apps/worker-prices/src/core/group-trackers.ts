@@ -1,7 +1,7 @@
 import type { Tracker } from '@0x-flights/shared'
 
 export function routeKey(t: Tracker): string {
-  return `${t.origin}:${t.destination}:${t.departureDate}:${t.adults}:${t.currency}`
+  return `${t.origin}:${t.destination}:${t.departureDate}:${t.adults}`
 }
 
 export function groupTrackersByRoute(trackers: Tracker[]): Map<string, Tracker[]> {

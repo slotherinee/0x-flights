@@ -6,6 +6,7 @@ import { getRedisConfig } from '@0x-flights/config'
 
 export type TrackStep =
   | 'AWAITING_LANGUAGE'
+  | 'AWAITING_CURRENCY'
   | 'AWAITING_ORIGIN_CITY'
   | 'AWAITING_DESTINATION_CITY'
   | 'AWAITING_DATE'
@@ -15,6 +16,7 @@ export interface ConversationState {
   step: TrackStep
   intent?: 'start' | 'track'
   lang?: 'en' | 'ru'
+  currency?: 'USD' | 'EUR' | 'RUB' | 'GBP'
   origin?: string
   destination?: string
   originCity?: string

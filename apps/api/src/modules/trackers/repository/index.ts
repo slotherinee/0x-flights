@@ -3,6 +3,8 @@ export {
   findUserByTelegramId,
   findUserLanguageByTelegramId,
   saveUserLanguageByTelegramId,
+  findUserCurrencyByTelegramId,
+  saveUserCurrencyByTelegramId,
 } from './user-repository'
 export {
   createTrackerForUser,

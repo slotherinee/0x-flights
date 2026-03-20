@@ -6,6 +6,8 @@ import {
   deleteTrackerByTelegramId,
   getUserLanguageByTelegramId,
   setUserLanguageByTelegramId,
+  getUserCurrencyByTelegramId,
+  setUserCurrencyByTelegramId,
 } from '../service'
 import { requireTelegramId } from './http-utils'
 
@@ -43,6 +45,43 @@ export const trackerRoutes = new Elysia({ prefix: '/trackers' })
 
       const saved = await setUserLanguageByTelegramId(telegramId, language)
       return { language: saved }
+    },
+    { body: t.Any() },
+  )
+
+  .get(
+    '/currency',
+    async ({ query, set }) => {
+      const telegramId = requireTelegramId(query)
+      if (!telegramId) {
+        set.status = 400
+        return { error: 'telegramId query param required' }
+      }
+
+      const currency = await getUserCurrencyByTelegramId(telegramId)
+      return { currency }
+    },
+    { query: t.Object({ telegramId: t.Optional(t.String()) }) },
+  )
+
+  .post(
+    '/currency',
+    async ({ body, set }) => {
+      const telegramId = (body as Record<string, unknown>)['telegramId']
+      const currencyRaw = (body as Record<string, unknown>)['currency']
+      const currency = typeof currencyRaw === 'string' ? currencyRaw.toUpperCase() : currencyRaw
+
+      if (typeof telegramId !== 'string' || !telegramId.trim()) {
+        set.status = 400
+        return { error: 'telegramId required' }
+      }
+      if (currency !== 'USD' && currency !== 'EUR' && currency !== 'RUB' && currency !== 'GBP') {
+        set.status = 400
+        return { error: 'currency must be USD, EUR, RUB or GBP' }
+      }
+
+      const saved = await setUserCurrencyByTelegramId(telegramId, currency)
+      return { currency: saved }
     },
     { body: t.Any() },
   )

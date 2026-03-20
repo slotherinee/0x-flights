@@ -5,6 +5,7 @@ import type { NotificationJob, Tracker } from '@0x-flights/shared'
 import type { FlightProvider } from '../providers'
 import { groupTrackersByRoute } from './group-trackers'
 import { loadUserTelegramMap } from './load-user-map'
+import { convertUsdToCurrency, getUsdRates } from './fx-rates'
 
 type PriceRecord = {
   trackerId: number
@@ -61,6 +62,13 @@ export async function runPriceCycle({
   const groups = groupTrackersByRoute(trackers)
   console.log(`[PriceWorker] ${trackers.length} trackers -> ${groups.size} unique routes`)
 
+  const usdRates = await getUsdRates(redis)
+  if (!usdRates) {
+    console.error('[PriceWorker] FX rates unavailable, cycle skipped.')
+    await markLastRun(redis)
+    return
+  }
+
   const userMap = await loadUserTelegramMap()
   const priceRecords: PriceRecord[] = []
   const notificationJobs: NotificationJob[] = []
@@ -76,7 +84,7 @@ export async function runPriceCycle({
         destination: sample.destination,
         departureDate: sample.departureDate,
         adults: sample.adults,
-        currency: sample.currency,
+        currency: 'USD',
       })
     } catch (err) {
       console.error(`[PriceWorker] Search error for ${key}:`, err)
@@ -91,18 +99,26 @@ export async function runPriceCycle({
     console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} ${result.currency}`)
 
     for (const tracker of group) {
+      const converted = convertUsdToCurrency(result.lowestPrice, tracker.currency, usdRates)
+      if (converted === null) {
+        console.error(
+          `[PriceWorker] Missing FX rate for ${tracker.currency}; tracker ${tracker.id} skipped`,
+        )
+        continue
+      }
+
       priceRecords.push({
         trackerId: tracker.id,
-        price: result.lowestPrice,
-        currency: result.currency,
+        price: converted,
+        currency: tracker.currency,
         source: result.source,
       })
 
-      if (result.lowestPrice <= tracker.priceThreshold) {
+      if (converted <= tracker.priceThreshold) {
         const telegramId = userMap.get(tracker.userId)
         if (!telegramId) continue
         notificationJobs.push(
-          toNotificationJob(tracker, telegramId, result.lowestPrice, result.currency),
+          toNotificationJob(tracker, telegramId, converted, tracker.currency),
         )
       }
     }

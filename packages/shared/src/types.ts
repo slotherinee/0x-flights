@@ -1,9 +1,11 @@
 export type UserLanguage = 'en' | 'ru'
+export type UserCurrency = 'USD' | 'EUR' | 'RUB' | 'GBP'
 
 export interface User {
   id: number
   telegramId: string
   language: UserLanguage
+  currency: UserCurrency
   username: string | null
   firstName: string | null
   lastName: string | null

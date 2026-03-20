@@ -1,0 +1,2 @@
+ALTER TABLE "users"
+ADD COLUMN IF NOT EXISTS "currency" char(3) NOT NULL DEFAULT 'USD';

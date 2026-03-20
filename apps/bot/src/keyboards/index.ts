@@ -13,6 +13,19 @@ export const languageKeyboard: TelegramBot.InlineKeyboardMarkup = {
   ],
 }
 
+export const currencyKeyboard: TelegramBot.InlineKeyboardMarkup = {
+  inline_keyboard: [
+    [
+      { text: 'USD', callback_data: 'curr:USD' },
+      { text: 'EUR', callback_data: 'curr:EUR' },
+    ],
+    [
+      { text: 'RUB', callback_data: 'curr:RUB' },
+      { text: 'GBP', callback_data: 'curr:GBP' },
+    ],
+  ],
+}
+
 export const deleteConfirmKeyboard = (id: number): TelegramBot.InlineKeyboardMarkup => ({
   inline_keyboard: [
     [
