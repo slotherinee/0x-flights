@@ -4,6 +4,7 @@ import { env } from '@0x-flights/config'
 import { runMigrations, closeDb } from '@0x-flights/db'
 import { healthRoutes } from './routes/health'
 import { trackerRoutes } from './routes/trackers'
+import { telegramRoutes } from './routes/telegram'
 
 await runMigrations()
 
@@ -16,6 +17,7 @@ const app = new Elysia()
   })
   .use(healthRoutes)
   .use(trackerRoutes)
+  .use(telegramRoutes)
   .listen(env.API_PORT)
 
 console.log(`🚀 API running on http://localhost:${env.API_PORT}`)
