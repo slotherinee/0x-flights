@@ -1,8 +1,20 @@
 import { Elysia } from 'elysia'
 import { env } from '@0x-flights/config'
+import { getRedisConfig } from '@0x-flights/config'
 import { getDb } from '@0x-flights/db'
 import { users, trackers, prices, notifications } from '@0x-flights/db'
 import { eq, desc, count, sql } from 'drizzle-orm'
+import { Redis } from 'ioredis'
+
+const redis = new Redis({
+  ...getRedisConfig(),
+  lazyConnect: true,
+  maxRetriesPerRequest: 1,
+})
+
+redis.on('error', (err) => {
+  console.error('[admin redis] error:', err.message)
+})
 
 // ─── Basic Auth ───────────────────────────────────────────────────────────────
 function checkAuth(h: string | undefined): boolean {
@@ -120,41 +132,78 @@ async function getRecentNotifications() {
     .limit(30)
 }
 
+async function getPriceWorkerStatus() {
+  const [lastRun, forceFlag] = await redis.mget('worker-prices:last-run', 'worker-prices:force-run')
+  let ageMs: number | null = null
+  let freshness: 'ok' | 'stale' | 'never' = 'never'
+
+  if (lastRun) {
+    const parsed = new Date(lastRun).getTime()
+    if (!Number.isNaN(parsed)) {
+      ageMs = Date.now() - parsed
+      const staleAfterMs = Math.max(env.PRICE_WORKER_INTERVAL_MS * 2, 60_000)
+      freshness = ageMs <= staleAfterMs ? 'ok' : 'stale'
+    }
+  }
+
+  return {
+    lastRun,
+    ageMs,
+    freshness,
+    forcePending: forceFlag != null,
+  }
+}
+
+function formatRelativeAge(ageMs: number | null): string {
+  if (ageMs == null) return 'never'
+  if (ageMs < 60_000) return 'just now'
+
+  const totalMinutes = Math.floor(ageMs / 60_000)
+  if (totalMinutes < 60) return `${totalMinutes} min ago`
+
+  const totalHours = Math.floor(totalMinutes / 60)
+  if (totalHours < 24) return `${totalHours} h ago`
+
+  const totalDays = Math.floor(totalHours / 24)
+  return `${totalDays} d ago`
+}
+
 // ─── CSS (shared) ─────────────────────────────────────────────────────────────
 const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
-  body { font-family: 'SF Mono', 'Fira Code', monospace; background: #0d0d0d; color: #e0e0e0; padding: 32px }
-  h1 { font-size: 1.1rem; color: #fff; margin-bottom: 24px; letter-spacing: 2px; text-transform: uppercase }
-  h2 { font-size: 0.78rem; color: #666; margin: 36px 0 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #1e1e1e; padding-bottom: 8px }
+  body { font-family: 'SF Mono', 'Fira Code', monospace; background: #111317; color: #fafafa; padding: 32px }
+  h1 { font-size: 1.1rem; color: #fafafa; margin-bottom: 24px; letter-spacing: 2px; text-transform: uppercase }
+  h2 { font-size: 0.78rem; color: #d8d8d8; margin: 36px 0 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #323842; padding-bottom: 8px }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px }
-  .stat { background: #111; border: 1px solid #222; border-radius: 6px; padding: 16px }
-  .stat-label { font-size: 0.68rem; color: #555; margin-bottom: 6px; text-transform: uppercase }
-  .stat-value { font-size: 1.8rem; color: #fff; font-weight: 700 }
+  .stat { background: #171b22; border: 1px solid #2d3440; border-radius: 6px; padding: 16px }
+  .stat-label { font-size: 0.68rem; color: #c8c8c8; margin-bottom: 6px; text-transform: uppercase }
+  .stat-value { font-size: 1.8rem; color: #fafafa; font-weight: 700 }
   table { width: 100%; border-collapse: collapse; font-size: 0.78rem }
-  th { text-align: left; color: #444; padding: 8px 10px; border-bottom: 1px solid #1e1e1e; font-weight: 400 }
-  td { padding: 7px 10px; border-bottom: 1px solid #161616; color: #bbb; white-space: nowrap }
+  th { text-align: left; color: #d7d7d7; padding: 8px 10px; border-bottom: 1px solid #323842; font-weight: 500 }
+  td { padding: 7px 10px; border-bottom: 1px solid #242b35; color: #fafafa; white-space: nowrap }
   tr.inactive td { opacity: 0.35 }
-  tr:hover td { background: #111 }
+  tr:hover td { background: #1a202a }
   .badge { padding: 2px 7px; border-radius: 3px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px }
-  .badge.active { background: #0a2016; color: #4ade80 }
-  .badge.off    { background: #200a0a; color: #f87171 }
+  .badge.active { background: #163324; color: #83f1b3 }
+  .badge.off    { background: #3b1a1a; color: #ff9d9d }
   .btn { border: none; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 0.72rem; font-family: inherit }
-  .btn-red  { background: #1e0a0a; color: #f87171; border: 1px solid #3d1515 }
-  .btn-red:hover { background: #2e1010 }
-  .btn-blue { background: #0a101e; color: #60a5fa; border: 1px solid #153060 }
-  .btn-blue:hover { background: #0d1830 }
-  .footer { font-size: 0.68rem; color: #333; margin-top: 40px }
-  a { color: #555; text-decoration: none } a:hover { color: #999 }
-  .dim { color: #444 }
+  .btn-red  { background: #3a1c1c; color: #ffd1d1; border: 1px solid #6a2d2d }
+  .btn-red:hover { background: #4a2323 }
+  .btn-blue { background: #1d2a44; color: #cfe2ff; border: 1px solid #34518c }
+  .btn-blue:hover { background: #26375a }
+  .footer { font-size: 0.68rem; color: #c2c2c2; margin-top: 40px }
+  a { color: #e5e5e5; text-decoration: none } a:hover { color: #ffffff }
+  .dim { color: #c2c2c2 }
   .price-tag { color: #facc15 }
   .nav { display: flex; gap: 20px; margin-bottom: 32px; font-size: 0.75rem }
-  .nav a { color: #555; padding: 4px 0; border-bottom: 1px solid transparent }
-  .nav a:hover { color: #aaa; border-bottom-color: #333 }
+  .nav a { color: #d5d5d5; padding: 4px 0; border-bottom: 1px solid transparent }
+  .nav a:hover { color: #fff; border-bottom-color: #8b99ab }
 `
 
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 function buildHtml(
   stats: Awaited<ReturnType<typeof getStats>>,
+  workerStatus: Awaited<ReturnType<typeof getPriceWorkerStatus>>,
   allUsers: Awaited<ReturnType<typeof getAllUsers>>,
   allTrackers: Awaited<ReturnType<typeof getAllTrackers>>,
   recentPrices: Awaited<ReturnType<typeof getRecentPrices>>,
@@ -238,6 +287,34 @@ function buildHtml(
     <div class="stat"><div class="stat-label">Notifications</div><div class="stat-value">${stats.notifications}</div></div>
   </div>
 
+  <h2>Worker status</h2>
+  <table>
+    <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Force-run flag</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>worker-prices</td>
+        <td>
+          ${workerStatus.lastRun
+            ? `${new Date(workerStatus.lastRun).toLocaleString()} <span class="dim">(${formatRelativeAge(workerStatus.ageMs)})</span>`
+            : '<span class="dim">never</span>'}
+        </td>
+        <td>
+          ${workerStatus.freshness === 'ok'
+            ? '<span class="badge active">ok</span>'
+            : workerStatus.freshness === 'stale'
+              ? '<span class="badge off">stale</span>'
+              : '<span class="dim">n/a</span>'}
+        </td>
+        <td>${workerStatus.forcePending ? '<span class="badge active">pending</span>' : '<span class="dim">no</span>'}</td>
+        <td>
+          <form method="POST" action="/adminpage/workers/prices/run-now" style="display:inline">
+            <button class="btn btn-blue">Run now</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
   <h2>Users</h2>
   <table>
     <thead><tr><th>ID</th><th>Telegram ID</th><th>Username</th><th>Name</th><th>Trackers (all/active)</th><th>Joined</th><th>Action</th></tr></thead>
@@ -272,12 +349,19 @@ export const adminRoutes = new Elysia({ prefix: '/adminpage' })
 
   .get('/', async ({ headers }) => {
     if (!checkAuth(headers['authorization'])) return unauth()
-    const [stats, allUsers, allTrackers, recentPrices, recentNotifs] = await Promise.all([
-      getStats(), getAllUsers(), getAllTrackers(), getRecentPrices(), getRecentNotifications(),
+    const [stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs] = await Promise.all([
+      getStats(), getPriceWorkerStatus(), getAllUsers(), getAllTrackers(), getRecentPrices(), getRecentNotifications(),
     ])
-    return new Response(buildHtml(stats, allUsers, allTrackers, recentPrices, recentNotifs), {
+    return new Response(buildHtml(stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs), {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
+  })
+
+  // Set force-run trigger for price worker
+  .post('/workers/prices/run-now', async ({ headers }) => {
+    if (!checkAuth(headers['authorization'])) return unauth()
+    await redis.set('worker-prices:force-run', '1', 'EX', 300)
+    return new Response(null, { status: 302, headers: { Location: '/adminpage' } })
   })
 
   // Deactivate single tracker

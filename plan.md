@@ -17,11 +17,11 @@
 ## Stage 3 — Admin page
 - [x] GET /adminpage — stats + trackers + Basic Auth
 - [x] POST /adminpage/trackers/:id/deactivate
-- [ ] Users table + ban (deactivate all user trackers)
-- [ ] Latest price column in trackers table
-- [ ] Notifications log
-- [ ] Worker status (last run timestamp from Redis)
-- [ ] "Run price check now" button (sets Redis trigger flag)
+- [x] Users table + ban (deactivate all user trackers)
+- [x] Latest price column in trackers table
+- [x] Notifications log
+- [x] Worker status (last run timestamp from Redis)
+- [x] "Run price check now" button (sets Redis trigger flag)
 
 ## Stage 4 — Telegram Bot
 - [x] Scaffold apps/bot
@@ -31,21 +31,21 @@
 - [x] Inline keyboards + callback_query handler
 
 ## Stage 5 — Price Worker
-- [ ] Scaffold apps/worker-prices
-- [ ] FlightProvider interface + StubProvider
+- [x] Scaffold apps/worker-prices
+- [x] FlightProvider interface + StubProvider
 - [ ] AmadeusProvider (behind interface)
-- [ ] Route-grouping + BullMQ enqueue
-- [ ] Respect Redis force-run trigger flag from admin
-- [ ] Write last-run timestamp to Redis for admin status
+- [x] Route-grouping + BullMQ enqueue
+- [x] Respect Redis force-run trigger flag from admin
+- [x] Write last-run timestamp to Redis for admin status
 
 ## Stage 6 — Notification Worker
-- [ ] Scaffold apps/worker-notifications
-- [ ] BullMQ consumer
-- [ ] Rate limiting + Telegram send
+- [x] Scaffold apps/worker-notifications
+- [x] BullMQ consumer
+- [x] Rate limiting + Telegram send
 - [ ] Priority queue: premium users notified before free users
 
 ## Stage 7 — Docker
-- [ ] docker-compose.yml
+- [x] docker-compose.yml
 
 ## Stage 8 — Tests
 - [ ] Unit tests: shared schemas

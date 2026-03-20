@@ -1,0 +1,25 @@
+# VCS
+.git
+.gitignore
+
+# Dependencies and caches
+node_modules
+**/node_modules
+.bun
+
+# Build/test artifacts
+dist
+build
+coverage
+*.log
+
+# Local env and editor files
+.env
+.env.*
+!.env.example
+.vscode
+.DS_Store
+
+# Python artifacts
+**/__pycache__
+**/*.pyc
