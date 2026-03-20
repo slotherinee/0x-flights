@@ -2,7 +2,7 @@ import { join } from 'path'
 import type { FlightProvider, FlightSearchParams, FlightSearchResult } from './types'
 
 // Path to the Python scraper relative to repo root
-const SCRIPT_PATH = join(import.meta.dir, '../../../../flights-script/flights.py')
+const SCRIPT_PATH = join(import.meta.dir, '../../scraper/flights.py')
 
 interface ScraperFlight {
   price: number | null
