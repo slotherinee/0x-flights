@@ -25,14 +25,14 @@
     </div>
 
     <nav class="tabs" role="tablist" aria-label="Admin tabs">
-      <button class="tab is-active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
-      <button class="tab" data-tab="users" role="tab" aria-selected="false">Users <span class="tab-count">{{allUsers.length}}</span></button>
-      <button class="tab" data-tab="trackers" role="tab" aria-selected="false">Trackers <span class="tab-count">{{allTrackers.length}}</span></button>
-      <button class="tab" data-tab="prices" role="tab" aria-selected="false">Prices <span class="tab-count">{{recentPrices.length}}</span></button>
-      <button class="tab" data-tab="notifications" role="tab" aria-selected="false">Notifications <span class="tab-count">{{recentNotifs.length}}</span></button>
+      <a class="tab {{#if (eq activeTab 'overview')}}is-active{{/if}}" href="/adminpage?tab=overview&usersPage={{usersPagination.page}}&trackersPage={{trackersPagination.page}}&pricesPage={{pricesPagination.page}}&notificationsPage={{notificationsPagination.page}}">Overview</a>
+      <a class="tab {{#if (eq activeTab 'users')}}is-active{{/if}}" href="/adminpage?tab=users&usersPage={{usersPagination.page}}&trackersPage={{trackersPagination.page}}&pricesPage={{pricesPagination.page}}&notificationsPage={{notificationsPagination.page}}">Users <span class="tab-count">{{usersPagination.total}}</span></a>
+      <a class="tab {{#if (eq activeTab 'trackers')}}is-active{{/if}}" href="/adminpage?tab=trackers&usersPage={{usersPagination.page}}&trackersPage={{trackersPagination.page}}&pricesPage={{pricesPagination.page}}&notificationsPage={{notificationsPagination.page}}">Trackers <span class="tab-count">{{trackersPagination.total}}</span></a>
+      <a class="tab {{#if (eq activeTab 'prices')}}is-active{{/if}}" href="/adminpage?tab=prices&usersPage={{usersPagination.page}}&trackersPage={{trackersPagination.page}}&pricesPage={{pricesPagination.page}}&notificationsPage={{notificationsPagination.page}}">Prices <span class="tab-count">{{pricesPagination.total}}</span></a>
+      <a class="tab {{#if (eq activeTab 'notifications')}}is-active{{/if}}" href="/adminpage?tab=notifications&usersPage={{usersPagination.page}}&trackersPage={{trackersPagination.page}}&pricesPage={{pricesPagination.page}}&notificationsPage={{notificationsPagination.page}}">Notifications <span class="tab-count">{{notificationsPagination.total}}</span></a>
     </nav>
 
-    <section class="tab-panel is-active" data-panel="overview">
+    <section class="tab-panel {{#if (eq activeTab 'overview')}}is-active{{/if}}" data-panel="overview">
       <div class="panel-head">
         <div>
           <h2>Worker status</h2>
@@ -80,20 +80,20 @@
       </div>
     </section>
 
-    <section class="tab-panel" data-panel="users">
+    <section class="tab-panel {{#if (eq activeTab 'users')}}is-active{{/if}}" data-panel="users">
       <div class="panel-head">
         <div>
           <h2>Users</h2>
           <p class="panel-help">What is happening: shows user base and lets you ban (disable all trackers) or unban (re-enable trackers).</p>
         </div>
       </div>
-      <div class="table-shell" data-paginate data-page-size="10" data-empty-cols="8">
+      <div class="table-shell">
         <table>
           <thead><tr><th>ID</th><th>Telegram ID</th><th>Username</th><th>Name</th><th>Trackers (all/active)</th><th>Joined</th><th>Action</th><th></th></tr></thead>
           <tbody>
             {{#if allUsers.length}}
               {{#each allUsers}}
-                <tr data-row>
+                <tr>
                   <td>#{{id}}</td>
                   <td>{{telegramId}}</td>
                   <td>{{username}}</td>
@@ -129,24 +129,28 @@
             {{/if}}
           </tbody>
         </table>
-        <div class="pager" data-pager></div>
+        <div class="pager">
+          <a class="btn btn-ghost {{#if (eq usersPagination.page 1)}}is-disabled{{/if}}" href="{{usersPrevHref}}">Prev</a>
+          <span class="pager-info">Page {{usersPagination.page}} / {{usersPagination.totalPages}} · {{usersPagination.total}} total</span>
+          <a class="btn btn-ghost {{#if (eq usersPagination.page usersPagination.totalPages)}}is-disabled{{/if}}" href="{{usersNextHref}}">Next</a>
+        </div>
       </div>
     </section>
 
-    <section class="tab-panel" data-panel="trackers">
+    <section class="tab-panel {{#if (eq activeTab 'trackers')}}is-active{{/if}}" data-panel="trackers">
       <div class="panel-head">
         <div>
           <h2>Trackers</h2>
           <p class="panel-help">What is happening: active tracker set used by worker-prices for route checks and notifications.</p>
         </div>
       </div>
-      <div class="table-shell" data-paginate data-page-size="12" data-empty-cols="9">
+      <div class="table-shell">
         <table>
           <thead><tr><th>ID</th><th>User</th><th>Route</th><th>Date</th><th>Threshold</th><th>Latest price</th><th>Status</th><th>Action</th><th></th></tr></thead>
           <tbody>
             {{#if allTrackers.length}}
               {{#each allTrackers}}
-                <tr data-row class="{{#unless isActive}}inactive{{/unless}}">
+                <tr class="{{#unless isActive}}inactive{{/unless}}">
                   <td>#{{id}}</td>
                   <td>{{userLabel}}</td>
                   <td><b>{{route}}</b></td>
@@ -179,24 +183,28 @@
             {{/if}}
           </tbody>
         </table>
-        <div class="pager" data-pager></div>
+        <div class="pager">
+          <a class="btn btn-ghost {{#if (eq trackersPagination.page 1)}}is-disabled{{/if}}" href="{{trackersPrevHref}}">Prev</a>
+          <span class="pager-info">Page {{trackersPagination.page}} / {{trackersPagination.totalPages}} · {{trackersPagination.total}} total</span>
+          <a class="btn btn-ghost {{#if (eq trackersPagination.page trackersPagination.totalPages)}}is-disabled{{/if}}" href="{{trackersNextHref}}">Next</a>
+        </div>
       </div>
     </section>
 
-    <section class="tab-panel" data-panel="prices">
+    <section class="tab-panel {{#if (eq activeTab 'prices')}}is-active{{/if}}" data-panel="prices">
       <div class="panel-head">
         <div>
           <h2>Recent price checks</h2>
           <p class="panel-help">What is happening: latest snapshots from provider fetches that feed thresholds and notifications.</p>
         </div>
       </div>
-      <div class="table-shell" data-paginate data-page-size="15" data-empty-cols="6">
+      <div class="table-shell">
         <table>
           <thead><tr><th>Tracker</th><th>Route</th><th>Price</th><th>Source</th><th>Fetched at</th><th></th></tr></thead>
           <tbody>
             {{#if recentPrices.length}}
               {{#each recentPrices}}
-                <tr data-row>
+                <tr>
                   <td>#{{trackerId}}</td>
                   <td>{{route}}</td>
                   <td class="price-tag">{{priceText}}</td>
@@ -216,24 +224,28 @@
             {{/if}}
           </tbody>
         </table>
-        <div class="pager" data-pager></div>
+        <div class="pager">
+          <a class="btn btn-ghost {{#if (eq pricesPagination.page 1)}}is-disabled{{/if}}" href="{{pricesPrevHref}}">Prev</a>
+          <span class="pager-info">Page {{pricesPagination.page}} / {{pricesPagination.totalPages}} · {{pricesPagination.total}} total</span>
+          <a class="btn btn-ghost {{#if (eq pricesPagination.page pricesPagination.totalPages)}}is-disabled{{/if}}" href="{{pricesNextHref}}">Next</a>
+        </div>
       </div>
     </section>
 
-    <section class="tab-panel" data-panel="notifications">
+    <section class="tab-panel {{#if (eq activeTab 'notifications')}}is-active{{/if}}" data-panel="notifications">
       <div class="panel-head">
         <div>
           <h2>Notifications log</h2>
           <p class="panel-help">What is happening: send queue outcomes, whether message was delivered or still pending.</p>
         </div>
       </div>
-      <div class="table-shell" data-paginate data-page-size="15" data-empty-cols="6">
+      <div class="table-shell">
         <table>
           <thead><tr><th>User</th><th>Route</th><th>Price</th><th>Status</th><th>Created at</th><th></th></tr></thead>
           <tbody>
             {{#if recentNotifs.length}}
               {{#each recentNotifs}}
-                <tr data-row>
+                <tr>
                   <td>{{userLabel}}</td>
                   <td>{{route}}</td>
                   <td class="price-tag">{{priceText}}</td>
@@ -259,7 +271,11 @@
             {{/if}}
           </tbody>
         </table>
-        <div class="pager" data-pager></div>
+        <div class="pager">
+          <a class="btn btn-ghost {{#if (eq notificationsPagination.page 1)}}is-disabled{{/if}}" href="{{notificationsPrevHref}}">Prev</a>
+          <span class="pager-info">Page {{notificationsPagination.page}} / {{notificationsPagination.totalPages}} · {{notificationsPagination.total}} total</span>
+          <a class="btn btn-ghost {{#if (eq notificationsPagination.page notificationsPagination.totalPages)}}is-disabled{{/if}}" href="{{notificationsNextHref}}">Next</a>
+        </div>
       </div>
     </section>
   </div>
@@ -277,75 +293,6 @@
 
   <script>
     (() => {
-      const tabs = Array.from(document.querySelectorAll('.tab'))
-      const panels = Array.from(document.querySelectorAll('.tab-panel'))
-
-      function setTab(name) {
-        tabs.forEach((btn) => {
-          const active = btn.dataset.tab === name
-          btn.classList.toggle('is-active', active)
-          btn.setAttribute('aria-selected', active ? 'true' : 'false')
-        })
-        panels.forEach((panel) => {
-          panel.classList.toggle('is-active', panel.dataset.panel === name)
-        })
-      }
-
-      tabs.forEach((btn) => {
-        btn.addEventListener('click', () => setTab(btn.dataset.tab))
-      })
-
-      const pagedTables = Array.from(document.querySelectorAll('[data-paginate]'))
-      pagedTables.forEach((shell) => {
-        const rows = Array.from(shell.querySelectorAll('tbody tr[data-row]'))
-        const pager = shell.querySelector('[data-pager]')
-        const size = Number(shell.getAttribute('data-page-size') || '10')
-        let page = 1
-        const pages = Math.max(1, Math.ceil(rows.length / size))
-
-        function renderPage() {
-          rows.forEach((row, idx) => {
-            const visible = idx >= (page - 1) * size && idx < page * size
-            row.style.display = visible ? '' : 'none'
-          })
-          if (!pager) return
-          pager.innerHTML = ''
-          if (rows.length <= size) return
-
-          const prev = document.createElement('button')
-          prev.className = 'btn btn-ghost'
-          prev.textContent = 'Prev'
-          prev.disabled = page <= 1
-          prev.addEventListener('click', () => {
-            if (page > 1) {
-              page -= 1
-              renderPage()
-            }
-          })
-
-          const next = document.createElement('button')
-          next.className = 'btn btn-ghost'
-          next.textContent = 'Next'
-          next.disabled = page >= pages
-          next.addEventListener('click', () => {
-            if (page < pages) {
-              page += 1
-              renderPage()
-            }
-          })
-
-          const info = document.createElement('span')
-          info.className = 'pager-info'
-          info.textContent = `Page ${page} / ${pages}`
-
-          pager.appendChild(prev)
-          pager.appendChild(info)
-          pager.appendChild(next)
-        }
-
-        renderPage()
-      })
-
       const modal = document.getElementById('detail-modal')
       const modalTitle = document.getElementById('detail-modal-title')
       const modalBody = document.getElementById('detail-modal-body')

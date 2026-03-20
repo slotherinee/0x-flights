@@ -1,12 +1,42 @@
 import type { AdminPageData, AdminPageViewModel } from '../types'
 import { formatRelativeAge } from './format-relative-age'
 
-export function toViewModel(data: AdminPageData, styles: string): AdminPageViewModel {
-  const { stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs } = data
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function hrefFor(
+  tab: 'users' | 'trackers' | 'prices' | 'notifications',
+  usersPage: number,
+  trackersPage: number,
+  pricesPage: number,
+  notificationsPage: number,
+): string {
+  const sp = new URLSearchParams()
+  sp.set('tab', tab)
+  sp.set('usersPage', String(usersPage))
+  sp.set('trackersPage', String(trackersPage))
+  sp.set('pricesPage', String(pricesPage))
+  sp.set('notificationsPage', String(notificationsPage))
+  return `/adminpage?${sp.toString()}`
+}
+
+export function toViewModel(
+  data: AdminPageData,
+  styles: string,
+  activeTab: 'overview' | 'users' | 'trackers' | 'prices' | 'notifications',
+): AdminPageViewModel {
+  const { stats, workerStatus, usersPage, trackersPage, pricesPage, notificationsPage } = data
+
+  const uPage = clamp(usersPage.meta.page, 1, usersPage.meta.totalPages)
+  const tPage = clamp(trackersPage.meta.page, 1, trackersPage.meta.totalPages)
+  const pPage = clamp(pricesPage.meta.page, 1, pricesPage.meta.totalPages)
+  const nPage = clamp(notificationsPage.meta.page, 1, notificationsPage.meta.totalPages)
 
   return {
     styles,
     now: new Date().toLocaleString(),
+    activeTab,
     stats,
     workerStatus: {
       lastRunText: workerStatus.lastRun
@@ -15,7 +45,7 @@ export function toViewModel(data: AdminPageData, styles: string): AdminPageViewM
       freshness: workerStatus.freshness,
       forcePending: workerStatus.forcePending,
     },
-    allUsers: allUsers.map((u) => ({
+    allUsers: usersPage.items.map((u) => ({
       id: u.id,
       telegramId: u.telegramId,
       username: u.username ? `@${u.username}` : '-',
@@ -26,7 +56,7 @@ export function toViewModel(data: AdminPageData, styles: string): AdminPageViewM
       canBan: Number(u.activeTrackerCount ?? 0) > 0,
       canUnban: Number(u.trackerCount ?? 0) > 0 && Number(u.activeTrackerCount ?? 0) === 0,
     })),
-    allTrackers: allTrackers.map((t) => ({
+    allTrackers: trackersPage.items.map((t) => ({
       id: t.id,
       userLabel: t.username ? `@${t.username}` : (t.telegramId ?? '-'),
       route: `${t.origin.trim()} -> ${t.destination.trim()}`,
@@ -37,19 +67,31 @@ export function toViewModel(data: AdminPageData, styles: string): AdminPageViewM
         : '-',
       isActive: t.isActive,
     })),
-    recentPrices: recentPrices.map((p) => ({
+    recentPrices: pricesPage.items.map((p) => ({
       trackerId: p.trackerId,
       route: `${p.origin?.trim() ?? '?'} -> ${p.destination?.trim() ?? '?'}`,
       priceText: `${p.price} ${p.currency.trim()}`,
       source: p.source,
       fetchedAt: new Date(p.fetchedAt).toLocaleString(),
     })),
-    recentNotifs: recentNotifs.map((n) => ({
+    recentNotifs: notificationsPage.items.map((n) => ({
       userLabel: n.username ? `@${n.username}` : (n.telegramId ?? '-'),
       route: `${n.origin?.trim() ?? '?'} -> ${n.destination?.trim() ?? '?'}`,
       priceText: `${n.price} ${n.currency.trim()}`,
       isSent: Boolean(n.sentAt),
       createdAt: new Date(n.createdAt).toLocaleString(),
     })),
+    usersPagination: usersPage.meta,
+    trackersPagination: trackersPage.meta,
+    pricesPagination: pricesPage.meta,
+    notificationsPagination: notificationsPage.meta,
+    usersPrevHref: hrefFor('users', clamp(uPage - 1, 1, usersPage.meta.totalPages), tPage, pPage, nPage),
+    usersNextHref: hrefFor('users', clamp(uPage + 1, 1, usersPage.meta.totalPages), tPage, pPage, nPage),
+    trackersPrevHref: hrefFor('trackers', uPage, clamp(tPage - 1, 1, trackersPage.meta.totalPages), pPage, nPage),
+    trackersNextHref: hrefFor('trackers', uPage, clamp(tPage + 1, 1, trackersPage.meta.totalPages), pPage, nPage),
+    pricesPrevHref: hrefFor('prices', uPage, tPage, clamp(pPage - 1, 1, pricesPage.meta.totalPages), nPage),
+    pricesNextHref: hrefFor('prices', uPage, tPage, clamp(pPage + 1, 1, pricesPage.meta.totalPages), nPage),
+    notificationsPrevHref: hrefFor('notifications', uPage, tPage, pPage, clamp(nPage - 1, 1, notificationsPage.meta.totalPages)),
+    notificationsNextHref: hrefFor('notifications', uPage, tPage, pPage, clamp(nPage + 1, 1, notificationsPage.meta.totalPages)),
   }
 }

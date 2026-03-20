@@ -245,6 +245,11 @@ tr:hover td {
   cursor: not-allowed;
 }
 
+.btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
 .pager {
   display: flex;
   justify-content: flex-end;

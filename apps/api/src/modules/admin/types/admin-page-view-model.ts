@@ -1,8 +1,10 @@
 import type { AdminStats } from './admin-stats'
+import type { PaginationMeta } from './pagination'
 
 export type AdminPageViewModel = {
   styles: string
   now: string
+  activeTab: 'overview' | 'users' | 'trackers' | 'prices' | 'notifications'
   stats: AdminStats
   workerStatus: {
     lastRunText: string
@@ -43,4 +45,16 @@ export type AdminPageViewModel = {
     isSent: boolean
     createdAt: string
   }>
+  usersPagination: PaginationMeta
+  trackersPagination: PaginationMeta
+  pricesPagination: PaginationMeta
+  notificationsPagination: PaginationMeta
+  usersPrevHref: string
+  usersNextHref: string
+  trackersPrevHref: string
+  trackersNextHref: string
+  pricesPrevHref: string
+  pricesNextHref: string
+  notificationsPrevHref: string
+  notificationsNextHref: string
 }

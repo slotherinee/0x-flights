@@ -1,11 +1,13 @@
 import { getDb } from '@0x-flights/db'
 import { users, trackers } from '@0x-flights/db'
 import { eq, desc, sql } from 'drizzle-orm'
-import type { AdminTrackerRow } from '../types'
+import type { AdminTrackerRow, Paginated, PaginationInput } from '../types'
 
-export async function getAllTrackers(): Promise<AdminTrackerRow[]> {
+export async function getAllTrackers({ page, pageSize }: PaginationInput): Promise<Paginated<AdminTrackerRow>> {
+  const offset = (page - 1) * pageSize
   const db = getDb()
-  return db
+  const [items, totalRows] = await Promise.all([
+    db
     .select({
       id: trackers.id,
       userId: trackers.userId,
@@ -27,5 +29,21 @@ export async function getAllTrackers(): Promise<AdminTrackerRow[]> {
     .from(trackers)
     .leftJoin(users, eq(trackers.userId, users.id))
     .orderBy(desc(trackers.createdAt))
-    .limit(100)
+      .offset(offset)
+      .limit(pageSize),
+    db.select({ count: sql<number>`cast(count(*) as int)` }).from(trackers),
+  ])
+
+  const total = totalRows[0]?.count ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
+  return {
+    items,
+    meta: {
+      page,
+      pageSize,
+      total,
+      totalPages,
+    },
+  }
 }

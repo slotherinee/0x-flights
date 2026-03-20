@@ -8,18 +8,30 @@ import {
 } from './data-fetchers'
 import { activateTracker, deactivateTracker, banUser, unbanUser, triggerPriceWorkerRunNow } from './repository'
 
-export async function getAdminPageData() {
-  const [stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs] =
+type AdminPageParams = {
+  usersPage: number
+  trackersPage: number
+  pricesPage: number
+  notificationsPage: number
+}
+
+const USERS_PAGE_SIZE = 15
+const TRACKERS_PAGE_SIZE = 20
+const PRICES_PAGE_SIZE = 30
+const NOTIFS_PAGE_SIZE = 30
+
+export async function getAdminPageData(params: AdminPageParams) {
+  const [stats, workerStatus, usersPage, trackersPage, pricesPage, notificationsPage] =
     await Promise.all([
       getStats(),
       getPriceWorkerStatus(),
-      getAllUsers(),
-      getAllTrackers(),
-      getRecentPrices(),
-      getRecentNotifications(),
+      getAllUsers({ page: params.usersPage, pageSize: USERS_PAGE_SIZE }),
+      getAllTrackers({ page: params.trackersPage, pageSize: TRACKERS_PAGE_SIZE }),
+      getRecentPrices({ page: params.pricesPage, pageSize: PRICES_PAGE_SIZE }),
+      getRecentNotifications({ page: params.notificationsPage, pageSize: NOTIFS_PAGE_SIZE }),
     ])
 
-  return { stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs }
+  return { stats, workerStatus, usersPage, trackersPage, pricesPage, notificationsPage }
 }
 
 export async function runPriceWorkerNow() {
