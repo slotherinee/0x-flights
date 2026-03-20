@@ -1,0 +1,486 @@
+[
+  {
+    "price": "913 euros",
+    "airlines": "EVA Air",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "12:30 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "4:30 PM"
+    },
+    "duration": "22 hr. Layover (1 of 1) is a 8 hr 25 min layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 676000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 12
+    }
+  },
+  {
+    "price": "1435 euros",
+    "airlines": "N/A",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "5:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "5:00 PM"
+    },
+    "duration": "17 hr 20 min. Layover (1 of 2) is a 1 hr 5 min layover at Munich International Airport in Munich. Layover (2 of 2) is a 2 hr 45 min layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 646000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 7
+    }
+  },
+  {
+    "price": "1127 euros",
+    "airlines": "China Airlines",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "11:25 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "2:15 PM"
+    },
+    "duration": "44 hr 50 min. Layover (1 of 1) is a 31 hr overnight layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 754000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 24
+    }
+  },
+  {
+    "price": "1370 euros",
+    "airlines": "Emirates and JAL",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "11:20 AM"
+    },
+    "duration": "30 hr 40 min. Layover (1 of 2) is a 1 hr 25 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 10 hr 55 min overnight layover at Haneda Airport in Tokyo",
+    "co2": {
+      "co2_current_kg": 1109000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 83
+    }
+  },
+  {
+    "price": "1384 euros",
+    "airlines": "Emirates and EVA Air",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "4:30 PM"
+    },
+    "duration": "35 hr 50 min. Layover (1 of 2) is a 2 hr 30 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 17 hr 55 min overnight layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 834000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 38
+    }
+  },
+  {
+    "price": "1400 euros",
+    "airlines": "Emirates and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "3:35 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "12:05 PM"
+    },
+    "duration": "38 hr 30 min. Layover (1 of 2) is a 10 hr 50 min overnight layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 12 hr 10 min overnight layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 856000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 41
+    }
+  },
+  {
+    "price": "1442 euros",
+    "airlines": "Emirates and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "12:05 PM"
+    },
+    "duration": "31 hr 25 min. Layover (1 of 2) is a 3 hr 45 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 12 hr 10 min overnight layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 870000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 44
+    }
+  },
+  {
+    "price": "1442 euros",
+    "airlines": "Austrian and Air China",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "5:10 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "5:00 PM"
+    },
+    "duration": "17 hr 50 min. Layover (1 of 2) is a 1 hr 10 min layover at Frankfurt Airport in Frankfurt am Main. Layover (2 of 2) is a 3 hr 15 min layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 785000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 30
+    }
+  },
+  {
+    "price": "2000 euros",
+    "airlines": "Finnair and JAL",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "11:35 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "11:20 AM"
+    },
+    "duration": "41 hr 45 min. Layover (1 of 2) is a 3 hr 30 min layover at Helsinki Airport in Helsinki. Layover (2 of 2) is a 19 hr 25 min overnight layover at Haneda Airport in Tokyo",
+    "co2": {
+      "co2_current_kg": 855000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 41
+    }
+  },
+  {
+    "price": "2633 euros",
+    "airlines": "Austrian and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:55 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "12:05 PM"
+    },
+    "duration": "19 hr 10 min. Layover (1 of 2) is a 1 hr 15 min layover at Zurich Airport in Zürich. Layover (2 of 2) is a 2 hr 40 min layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 793000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 31
+    }
+  },
+  {
+    "price": "4576 euros",
+    "airlines": "Air China",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "1:30 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "10:00 AM"
+    },
+    "duration": "14 hr 30 min. Layover (1 of 1) is a 2 hr 40 min overnight layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 598000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": -1
+    }
+  },
+  {
+    "price": "913 euros",
+    "airlines": "EVA Air",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "12:30 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "4:30 PM"
+    },
+    "duration": "22 hr. Layover (1 of 1) is a 8 hr 25 min layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 676000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 12
+    }
+  },
+  {
+    "price": "1435 euros",
+    "airlines": "N/A",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "5:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "5:00 PM"
+    },
+    "duration": "17 hr 20 min. Layover (1 of 2) is a 1 hr 5 min layover at Munich International Airport in Munich. Layover (2 of 2) is a 2 hr 45 min layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 646000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 7
+    }
+  },
+  {
+    "price": "1127 euros",
+    "airlines": "China Airlines",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "11:25 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "2:15 PM"
+    },
+    "duration": "44 hr 50 min. Layover (1 of 1) is a 31 hr overnight layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 754000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 24
+    }
+  },
+  {
+    "price": "1370 euros",
+    "airlines": "Emirates and JAL",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "11:20 AM"
+    },
+    "duration": "30 hr 40 min. Layover (1 of 2) is a 1 hr 25 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 10 hr 55 min overnight layover at Haneda Airport in Tokyo",
+    "co2": {
+      "co2_current_kg": 1109000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 83
+    }
+  },
+  {
+    "price": "1384 euros",
+    "airlines": "Emirates and EVA Air",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "4:30 PM"
+    },
+    "duration": "35 hr 50 min. Layover (1 of 2) is a 2 hr 30 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 17 hr 55 min overnight layover in Taipei City. Transfer here from Taiwan Taoyuan International Airport to Taipei Songshan Airport",
+    "co2": {
+      "co2_current_kg": 834000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 38
+    }
+  },
+  {
+    "price": "1400 euros",
+    "airlines": "Emirates and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "3:35 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "12:05 PM"
+    },
+    "duration": "38 hr 30 min. Layover (1 of 2) is a 10 hr 50 min overnight layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 12 hr 10 min overnight layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 856000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 41
+    }
+  },
+  {
+    "price": "1442 euros",
+    "airlines": "Emirates and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:40 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "12:05 PM"
+    },
+    "duration": "31 hr 25 min. Layover (1 of 2) is a 3 hr 45 min layover at Dubai International Airport in Dubai. Layover (2 of 2) is a 12 hr 10 min overnight layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 870000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 44
+    }
+  },
+  {
+    "price": "1442 euros",
+    "airlines": "Austrian and Air China",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "5:10 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "5:00 PM"
+    },
+    "duration": "17 hr 50 min. Layover (1 of 2) is a 1 hr 10 min layover at Frankfurt Airport in Frankfurt am Main. Layover (2 of 2) is a 3 hr 15 min layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 785000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 30
+    }
+  },
+  {
+    "price": "2000 euros",
+    "airlines": "Finnair and JAL",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "11:35 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Saturday, May 23",
+      "time": "11:20 AM"
+    },
+    "duration": "41 hr 45 min. Layover (1 of 2) is a 3 hr 30 min layover at Helsinki Airport in Helsinki. Layover (2 of 2) is a 19 hr 25 min overnight layover at Haneda Airport in Tokyo",
+    "co2": {
+      "co2_current_kg": 855000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 41
+    }
+  },
+  {
+    "price": "2633 euros",
+    "airlines": "Austrian and Cathay Pacific",
+    "is_direct": false,
+    "stops": 2,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "10:55 AM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "12:05 PM"
+    },
+    "duration": "19 hr 10 min. Layover (1 of 2) is a 1 hr 15 min layover at Zurich Airport in Zürich. Layover (2 of 2) is a 2 hr 40 min layover at Hong Kong International Airport in Hong Kong",
+    "co2": {
+      "co2_current_kg": 793000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": 31
+    }
+  },
+  {
+    "price": "4576 euros",
+    "airlines": "Air China",
+    "is_direct": false,
+    "stops": 1,
+    "departure": {
+      "airport": "Vienna International Airport",
+      "date": "Thursday, May 21",
+      "time": "1:30 PM"
+    },
+    "arrival": {
+      "airport": "Shanghai Hongqiao International Airport",
+      "date": "Friday, May 22",
+      "time": "10:00 AM"
+    },
+    "duration": "14 hr 30 min. Layover (1 of 1) is a 2 hr 40 min overnight layover at Beijing Capital International Airport in Beijing",
+    "co2": {
+      "co2_current_kg": 598000,
+      "co2_typical_kg": 606000,
+      "co2_percent_diff": -1
+    }
+  }
+]
