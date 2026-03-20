@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq'
+import cron from 'node-cron'
 import { Redis } from 'ioredis'
-import { env, getRedisConfig } from '@0x-flights/config'
+import { getRedisConfig } from '@0x-flights/config'
 import { closeDb } from '@0x-flights/db'
 import { QUEUE_NAMES } from '@0x-flights/shared'
 import type { NotificationJob } from '@0x-flights/shared'
@@ -22,11 +23,20 @@ const notifQueue = new Queue<NotificationJob>(QUEUE_NAMES.NOTIFICATIONS, {
 })
 
 const runCycle = () => runPriceCycle({ provider, redis, notifQueue })
+const MOSCOW_TZ = 'Europe/Moscow'
+const FORCE_RUN_CHECK_INTERVAL_MS = 30_000
 
 // ─── Main loop ────────────────────────────────────────────────────────────────
-console.log(`[PriceWorker] Starting. Interval: ${env.PRICE_WORKER_INTERVAL_MS}ms`)
+console.log('[PriceWorker] Starting. Cron schedule: 0 8,20 * * * (Europe/Moscow)')
 
-await runCycle()
+const scheduledTask = cron.schedule(
+  '0 8,20 * * *',
+  async () => {
+    console.log('[PriceWorker] Cron run at 08:00/20:00 MSK')
+    await runCycle()
+  },
+  { timezone: MOSCOW_TZ },
+)
 
 setInterval(async () => {
   const force = await redis.getdel('worker-prices:force-run')
@@ -34,13 +44,13 @@ setInterval(async () => {
     console.log('[PriceWorker] Force-run triggered by admin.')
     await runCycle()
   }
-}, 30_000)
-
-setInterval(runCycle, env.PRICE_WORKER_INTERVAL_MS)
+}, FORCE_RUN_CHECK_INTERVAL_MS)
 
 // ─── Graceful shutdown ────────────────────────────────────────────────────────
 const shutdown = async () => {
   console.log('[PriceWorker] Shutting down...')
+  scheduledTask.stop()
+  scheduledTask.destroy()
   await notifQueue.close()
   await redis.quit()
   await closeProviderIfSupported(provider)
