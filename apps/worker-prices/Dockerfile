@@ -2,8 +2,8 @@ FROM oven/bun:1-debian AS base
 WORKDIR /app
 
 # Install Python + pip + Playwright system deps
-RUN apt-get update && apt-get install -y \
-    python3 python3-pip python3-venv \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Playwright + chromium
@@ -18,7 +18,7 @@ COPY packages/config/package.json ./packages/config/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
 COPY apps/worker-prices/package.json ./apps/worker-prices/
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --production
 
 # Copy source
 COPY packages/config/src ./packages/config/src
@@ -26,6 +26,6 @@ COPY packages/shared/src ./packages/shared/src
 COPY packages/db/src ./packages/db/src
 COPY packages/db/migrations ./packages/db/migrations
 COPY apps/worker-prices/src ./apps/worker-prices/src
-COPY apps/worker-prices/scraper ./apps/worker-prices/scraper
+COPY apps/worker-prices/scraper/flights.py ./apps/worker-prices/scraper/flights.py
 
 CMD ["bun", "run", "apps/worker-prices/src/index.ts"]
