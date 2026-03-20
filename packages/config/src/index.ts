@@ -18,6 +18,8 @@ const envSchema = z.object({
 
   // API
   API_PORT: z.coerce.number().default(3000),
+  ADMIN_USER: z.string().default('admin'),
+  ADMIN_PASSWORD: z.string().default('secret123'),
 
   // Flight provider
   FLIGHT_PROVIDER: z.enum(['stub', 'amadeus']).default('stub'),
