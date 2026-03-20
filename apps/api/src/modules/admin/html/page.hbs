@@ -7,156 +7,388 @@
   <style>{{{styles}}}</style>
 </head>
 <body>
-  <h1>0x-flights admin</h1>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Control room</p>
+        <h1>0x-flights admin</h1>
+        <p class="subtitle">Monitor users, trackers, worker health and delivery pipeline in one place.</p>
+      </div>
+      <p class="footer">Loaded {{now}} · <a href="/adminpage">Refresh</a></p>
+    </header>
 
-  <div class="stats">
-    <div class="stat"><div class="stat-label">Users</div><div class="stat-value">{{stats.users}}</div></div>
-    <div class="stat"><div class="stat-label">Active trackers</div><div class="stat-value">{{stats.activeTrackers}}</div></div>
-    <div class="stat"><div class="stat-label">Price checks</div><div class="stat-value">{{stats.priceChecks}}</div></div>
-    <div class="stat"><div class="stat-label">Notifications</div><div class="stat-value">{{stats.notifications}}</div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Users</div><div class="stat-value">{{stats.users}}</div></div>
+      <div class="stat"><div class="stat-label">Active trackers</div><div class="stat-value">{{stats.activeTrackers}}</div></div>
+      <div class="stat"><div class="stat-label">Price checks</div><div class="stat-value">{{stats.priceChecks}}</div></div>
+      <div class="stat"><div class="stat-label">Notifications</div><div class="stat-value">{{stats.notifications}}</div></div>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Admin tabs">
+      <button class="tab is-active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+      <button class="tab" data-tab="users" role="tab" aria-selected="false">Users <span class="tab-count">{{allUsers.length}}</span></button>
+      <button class="tab" data-tab="trackers" role="tab" aria-selected="false">Trackers <span class="tab-count">{{allTrackers.length}}</span></button>
+      <button class="tab" data-tab="prices" role="tab" aria-selected="false">Prices <span class="tab-count">{{recentPrices.length}}</span></button>
+      <button class="tab" data-tab="notifications" role="tab" aria-selected="false">Notifications <span class="tab-count">{{recentNotifs.length}}</span></button>
+    </nav>
+
+    <section class="tab-panel is-active" data-panel="overview">
+      <div class="panel-head">
+        <div>
+          <h2>Worker status</h2>
+          <p class="panel-help">What is happening: checks if price worker is fresh and allows forcing next run.</p>
+        </div>
+      </div>
+      <div class="table-shell">
+        <table>
+          <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Force-run flag</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>worker-prices</td>
+              <td>{{workerStatus.lastRunText}}</td>
+              <td>
+                {{#if (eq workerStatus.freshness "ok")}}
+                  <span class="badge active">ok</span>
+                {{else}}
+                  {{#if (eq workerStatus.freshness "stale")}}
+                    <span class="badge off">stale</span>
+                  {{else}}
+                    <span class="dim">n/a</span>
+                  {{/if}}
+                {{/if}}
+              </td>
+              <td>
+                {{#if workerStatus.forcePending}}
+                  <span class="badge active">pending</span>
+                {{else}}
+                  <span class="dim">no</span>
+                {{/if}}
+              </td>
+              <td>
+                <form method="POST" action="/adminpage/workers/prices/run-now" style="display:inline">
+                  <button class="btn btn-blue">Run now</button>
+                </form>
+                <button
+                  class="btn btn-ghost js-details"
+                  data-title="Worker details"
+                  data-details="Worker::worker-prices||Last run::{{workerStatus.lastRunText}}||Freshness::{{workerStatus.freshness}}||Force pending::{{#if workerStatus.forcePending}}yes{{else}}no{{/if}}||Action::Run now sets force-run flag in Redis"
+                >Details</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="users">
+      <div class="panel-head">
+        <div>
+          <h2>Users</h2>
+          <p class="panel-help">What is happening: shows user base and lets you ban (disable all trackers) or unban (re-enable trackers).</p>
+        </div>
+      </div>
+      <div class="table-shell" data-paginate data-page-size="10" data-empty-cols="8">
+        <table>
+          <thead><tr><th>ID</th><th>Telegram ID</th><th>Username</th><th>Name</th><th>Trackers (all/active)</th><th>Joined</th><th>Action</th><th></th></tr></thead>
+          <tbody>
+            {{#if allUsers.length}}
+              {{#each allUsers}}
+                <tr data-row>
+                  <td>#{{id}}</td>
+                  <td>{{telegramId}}</td>
+                  <td>{{username}}</td>
+                  <td>{{fullName}}</td>
+                  <td>{{trackerCount}} / <span class="good">{{activeTrackerCount}}</span></td>
+                  <td>{{joinedDate}}</td>
+                  <td>
+                    {{#if canBan}}
+                      <form method="POST" action="/adminpage/users/{{id}}/ban" style="display:inline">
+                        <button class="btn btn-red" onclick="return confirm('Ban user #{{id}} - deactivate all their trackers?')">Ban</button>
+                      </form>
+                    {{else}}
+                      {{#if canUnban}}
+                        <form method="POST" action="/adminpage/users/{{id}}/unban" style="display:inline">
+                          <button class="btn btn-blue" onclick="return confirm('Unban user #{{id}} - reactivate trackers?')">Unban</button>
+                        </form>
+                      {{else}}
+                        <span class="dim">-</span>
+                      {{/if}}
+                    {{/if}}
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-ghost js-details"
+                      data-title="User #{{id}}"
+                      data-details="Telegram ID::{{telegramId}}||Username::{{username}}||Full name::{{fullName}}||Total trackers::{{trackerCount}}||Active trackers::{{activeTrackerCount}}||Joined::{{joinedDate}}||Action state::{{#if canBan}}can ban{{else}}{{#if canUnban}}can unban{{else}}no actions{{/if}}{{/if}}"
+                    >Details</button>
+                  </td>
+                </tr>
+              {{/each}}
+            {{else}}
+              <tr><td colspan="8" class="empty">no data</td></tr>
+            {{/if}}
+          </tbody>
+        </table>
+        <div class="pager" data-pager></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="trackers">
+      <div class="panel-head">
+        <div>
+          <h2>Trackers</h2>
+          <p class="panel-help">What is happening: active tracker set used by worker-prices for route checks and notifications.</p>
+        </div>
+      </div>
+      <div class="table-shell" data-paginate data-page-size="12" data-empty-cols="9">
+        <table>
+          <thead><tr><th>ID</th><th>User</th><th>Route</th><th>Date</th><th>Threshold</th><th>Latest price</th><th>Status</th><th>Action</th><th></th></tr></thead>
+          <tbody>
+            {{#if allTrackers.length}}
+              {{#each allTrackers}}
+                <tr data-row class="{{#unless isActive}}inactive{{/unless}}">
+                  <td>#{{id}}</td>
+                  <td>{{userLabel}}</td>
+                  <td><b>{{route}}</b></td>
+                  <td>{{departureDate}}</td>
+                  <td>{{thresholdText}}</td>
+                  <td><span class="price-tag">{{latestPriceText}}</span></td>
+                  <td><span class="badge {{#if isActive}}active{{else}}off{{/if}}">{{#if isActive}}active{{else}}off{{/if}}</span></td>
+                  <td>
+                    {{#if isActive}}
+                      <form method="POST" action="/adminpage/trackers/{{id}}/deactivate" style="display:inline">
+                        <button class="btn btn-red" onclick="return confirm('Deactivate #{{id}}?')">Off</button>
+                      </form>
+                    {{else}}
+                      <form method="POST" action="/adminpage/trackers/{{id}}/activate" style="display:inline">
+                        <button class="btn btn-blue" onclick="return confirm('Activate #{{id}}?')">On</button>
+                      </form>
+                    {{/if}}
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-ghost js-details"
+                      data-title="Tracker #{{id}}"
+                      data-details="User::{{userLabel}}||Route::{{route}}||Departure::{{departureDate}}||Threshold::{{thresholdText}}||Latest price::{{latestPriceText}}||Status::{{#if isActive}}active{{else}}off{{/if}}"
+                    >Details</button>
+                  </td>
+                </tr>
+              {{/each}}
+            {{else}}
+              <tr><td colspan="9" class="empty">no data</td></tr>
+            {{/if}}
+          </tbody>
+        </table>
+        <div class="pager" data-pager></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="prices">
+      <div class="panel-head">
+        <div>
+          <h2>Recent price checks</h2>
+          <p class="panel-help">What is happening: latest snapshots from provider fetches that feed thresholds and notifications.</p>
+        </div>
+      </div>
+      <div class="table-shell" data-paginate data-page-size="15" data-empty-cols="6">
+        <table>
+          <thead><tr><th>Tracker</th><th>Route</th><th>Price</th><th>Source</th><th>Fetched at</th><th></th></tr></thead>
+          <tbody>
+            {{#if recentPrices.length}}
+              {{#each recentPrices}}
+                <tr data-row>
+                  <td>#{{trackerId}}</td>
+                  <td>{{route}}</td>
+                  <td class="price-tag">{{priceText}}</td>
+                  <td>{{source}}</td>
+                  <td>{{fetchedAt}}</td>
+                  <td>
+                    <button
+                      class="btn btn-ghost js-details"
+                      data-title="Price check: tracker #{{trackerId}}"
+                      data-details="Tracker::#{{trackerId}}||Route::{{route}}||Price::{{priceText}}||Source::{{source}}||Fetched at::{{fetchedAt}}"
+                    >Details</button>
+                  </td>
+                </tr>
+              {{/each}}
+            {{else}}
+              <tr><td colspan="6" class="empty">no data</td></tr>
+            {{/if}}
+          </tbody>
+        </table>
+        <div class="pager" data-pager></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="notifications">
+      <div class="panel-head">
+        <div>
+          <h2>Notifications log</h2>
+          <p class="panel-help">What is happening: send queue outcomes, whether message was delivered or still pending.</p>
+        </div>
+      </div>
+      <div class="table-shell" data-paginate data-page-size="15" data-empty-cols="6">
+        <table>
+          <thead><tr><th>User</th><th>Route</th><th>Price</th><th>Status</th><th>Created at</th><th></th></tr></thead>
+          <tbody>
+            {{#if recentNotifs.length}}
+              {{#each recentNotifs}}
+                <tr data-row>
+                  <td>{{userLabel}}</td>
+                  <td>{{route}}</td>
+                  <td class="price-tag">{{priceText}}</td>
+                  <td>
+                    {{#if isSent}}
+                      <span class="badge active">sent</span>
+                    {{else}}
+                      <span class="badge off">pending</span>
+                    {{/if}}
+                  </td>
+                  <td>{{createdAt}}</td>
+                  <td>
+                    <button
+                      class="btn btn-ghost js-details"
+                      data-title="Notification event"
+                      data-details="User::{{userLabel}}||Route::{{route}}||Price::{{priceText}}||Status::{{#if isSent}}sent{{else}}pending{{/if}}||Created at::{{createdAt}}"
+                    >Details</button>
+                  </td>
+                </tr>
+              {{/each}}
+            {{else}}
+              <tr><td colspan="6" class="empty">no data</td></tr>
+            {{/if}}
+          </tbody>
+        </table>
+        <div class="pager" data-pager></div>
+      </div>
+    </section>
   </div>
 
-  <h2>Worker status</h2>
-  <table>
-    <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Force-run flag</th><th>Action</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>worker-prices</td>
-        <td>{{workerStatus.lastRunText}}</td>
-        <td>
-          {{#if (eq workerStatus.freshness "ok")}}
-            <span class="badge active">ok</span>
-          {{else}}
-            {{#if (eq workerStatus.freshness "stale")}}
-              <span class="badge off">stale</span>
-            {{else}}
-              <span class="dim">n/a</span>
-            {{/if}}
-          {{/if}}
-        </td>
-        <td>
-          {{#if workerStatus.forcePending}}
-            <span class="badge active">pending</span>
-          {{else}}
-            <span class="dim">no</span>
-          {{/if}}
-        </td>
-        <td>
-          <form method="POST" action="/adminpage/workers/prices/run-now" style="display:inline">
-            <button class="btn btn-blue">Run now</button>
-          </form>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="modal" id="detail-modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+      <div class="modal-head">
+        <h3 id="detail-modal-title">Details</h3>
+        <button class="btn btn-ghost" data-close-modal>Close</button>
+      </div>
+      <div class="modal-body" id="detail-modal-body"></div>
+    </div>
+  </div>
 
-  <h2>Users</h2>
-  <table>
-    <thead><tr><th>ID</th><th>Telegram ID</th><th>Username</th><th>Name</th><th>Trackers (all/active)</th><th>Joined</th><th>Action</th></tr></thead>
-    <tbody>
-      {{#if allUsers.length}}
-        {{#each allUsers}}
-          <tr>
-            <td>#{{id}}</td>
-            <td>{{telegramId}}</td>
-            <td>{{username}}</td>
-            <td>{{fullName}}</td>
-            <td>{{trackerCount}} / <span style="color:#4ade80">{{activeTrackerCount}}</span></td>
-            <td>{{joinedDate}}</td>
-            <td>
-              {{#if canBan}}
-                <form method="POST" action="/adminpage/users/{{id}}/ban" style="display:inline">
-                  <button class="btn btn-red" onclick="return confirm('Ban user #{{id}} - deactivate all their trackers?')">Ban</button>
-                </form>
-              {{else}}
-                <span class="dim">-</span>
-              {{/if}}
-            </td>
-          </tr>
-        {{/each}}
-      {{else}}
-        <tr><td colspan="7" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
-      {{/if}}
-    </tbody>
-  </table>
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll('.tab'))
+      const panels = Array.from(document.querySelectorAll('.tab-panel'))
 
-  <h2>Trackers</h2>
-  <table>
-    <thead><tr><th>ID</th><th>User</th><th>Route</th><th>Date</th><th>Threshold</th><th>Latest price</th><th>Status</th><th>Action</th></tr></thead>
-    <tbody>
-      {{#if allTrackers.length}}
-        {{#each allTrackers}}
-          <tr class="{{#unless isActive}}inactive{{/unless}}">
-            <td>#{{id}}</td>
-            <td>{{userLabel}}</td>
-            <td><b>{{route}}</b></td>
-            <td>{{departureDate}}</td>
-            <td>{{thresholdText}}</td>
-            <td><span class="price-tag">{{latestPriceText}}</span></td>
-            <td><span class="badge {{#if isActive}}active{{else}}off{{/if}}">{{#if isActive}}active{{else}}off{{/if}}</span></td>
-            <td>
-              {{#if isActive}}
-                <form method="POST" action="/adminpage/trackers/{{id}}/deactivate" style="display:inline">
-                  <button class="btn btn-red" onclick="return confirm('Deactivate #{{id}}?')">Off</button>
-                </form>
-              {{else}}
-                <span class="dim">-</span>
-              {{/if}}
-            </td>
-          </tr>
-        {{/each}}
-      {{else}}
-        <tr><td colspan="8" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
-      {{/if}}
-    </tbody>
-  </table>
+      function setTab(name) {
+        tabs.forEach((btn) => {
+          const active = btn.dataset.tab === name
+          btn.classList.toggle('is-active', active)
+          btn.setAttribute('aria-selected', active ? 'true' : 'false')
+        })
+        panels.forEach((panel) => {
+          panel.classList.toggle('is-active', panel.dataset.panel === name)
+        })
+      }
 
-  <h2>Recent price checks</h2>
-  <table>
-    <thead><tr><th>Tracker</th><th>Route</th><th>Price</th><th>Source</th><th>Fetched at</th></tr></thead>
-    <tbody>
-      {{#if recentPrices.length}}
-        {{#each recentPrices}}
-          <tr>
-            <td>#{{trackerId}}</td>
-            <td>{{route}}</td>
-            <td class="price-tag">{{priceText}}</td>
-            <td>{{source}}</td>
-            <td>{{fetchedAt}}</td>
-          </tr>
-        {{/each}}
-      {{else}}
-        <tr><td colspan="5" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
-      {{/if}}
-    </tbody>
-  </table>
+      tabs.forEach((btn) => {
+        btn.addEventListener('click', () => setTab(btn.dataset.tab))
+      })
 
-  <h2>Notifications log</h2>
-  <table>
-    <thead><tr><th>User</th><th>Route</th><th>Price</th><th>Status</th><th>Created at</th></tr></thead>
-    <tbody>
-      {{#if recentNotifs.length}}
-        {{#each recentNotifs}}
-          <tr>
-            <td>{{userLabel}}</td>
-            <td>{{route}}</td>
-            <td class="price-tag">{{priceText}}</td>
-            <td>
-              {{#if isSent}}
-                <span class="badge active">sent</span>
-              {{else}}
-                <span class="badge off">pending</span>
-              {{/if}}
-            </td>
-            <td>{{createdAt}}</td>
-          </tr>
-        {{/each}}
-      {{else}}
-        <tr><td colspan="5" style="color:#c2c2c2;padding:16px;text-align:center">no data</td></tr>
-      {{/if}}
-    </tbody>
-  </table>
+      const pagedTables = Array.from(document.querySelectorAll('[data-paginate]'))
+      pagedTables.forEach((shell) => {
+        const rows = Array.from(shell.querySelectorAll('tbody tr[data-row]'))
+        const pager = shell.querySelector('[data-pager]')
+        const size = Number(shell.getAttribute('data-page-size') || '10')
+        let page = 1
+        const pages = Math.max(1, Math.ceil(rows.length / size))
 
-  <p class="footer">Loaded {{now}} · <a href="/adminpage">Refresh</a></p>
+        function renderPage() {
+          rows.forEach((row, idx) => {
+            const visible = idx >= (page - 1) * size && idx < page * size
+            row.style.display = visible ? '' : 'none'
+          })
+          if (!pager) return
+          pager.innerHTML = ''
+          if (rows.length <= size) return
+
+          const prev = document.createElement('button')
+          prev.className = 'btn btn-ghost'
+          prev.textContent = 'Prev'
+          prev.disabled = page <= 1
+          prev.addEventListener('click', () => {
+            if (page > 1) {
+              page -= 1
+              renderPage()
+            }
+          })
+
+          const next = document.createElement('button')
+          next.className = 'btn btn-ghost'
+          next.textContent = 'Next'
+          next.disabled = page >= pages
+          next.addEventListener('click', () => {
+            if (page < pages) {
+              page += 1
+              renderPage()
+            }
+          })
+
+          const info = document.createElement('span')
+          info.className = 'pager-info'
+          info.textContent = `Page ${page} / ${pages}`
+
+          pager.appendChild(prev)
+          pager.appendChild(info)
+          pager.appendChild(next)
+        }
+
+        renderPage()
+      })
+
+      const modal = document.getElementById('detail-modal')
+      const modalTitle = document.getElementById('detail-modal-title')
+      const modalBody = document.getElementById('detail-modal-body')
+      if (!modal || !modalTitle || !modalBody) return
+
+      function openModal(title, detailsRaw) {
+        modalTitle.textContent = title || 'Details'
+        modalBody.innerHTML = ''
+        const details = String(detailsRaw || '').split('||').map((x) => x.trim()).filter(Boolean)
+        details.forEach((line) => {
+          const [k, ...rest] = line.split('::')
+          const v = rest.join('::') || '-'
+          const row = document.createElement('div')
+          row.className = 'detail-row'
+          row.innerHTML = `<span class="detail-key"></span><span class="detail-val"></span>`
+          row.querySelector('.detail-key').textContent = k || 'Field'
+          row.querySelector('.detail-val').textContent = v
+          modalBody.appendChild(row)
+        })
+
+        modal.classList.add('is-open')
+        modal.setAttribute('aria-hidden', 'false')
+      }
+
+      function closeModal() {
+        modal.classList.remove('is-open')
+        modal.setAttribute('aria-hidden', 'true')
+      }
+
+      document.querySelectorAll('.js-details').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          openModal(btn.getAttribute('data-title'), btn.getAttribute('data-details'))
+        })
+      })
+
+      document.querySelectorAll('[data-close-modal]').forEach((el) => {
+        el.addEventListener('click', closeModal)
+      })
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal()
+      })
+    })()
+  </script>
 </body>
 </html>

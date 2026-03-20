@@ -6,7 +6,7 @@ import {
   getRecentPrices,
   getRecentNotifications,
 } from './data-fetchers'
-import { deactivateTracker, banUser, triggerPriceWorkerRunNow } from './repository'
+import { activateTracker, deactivateTracker, banUser, unbanUser, triggerPriceWorkerRunNow } from './repository'
 
 export async function getAdminPageData() {
   const [stats, workerStatus, allUsers, allTrackers, recentPrices, recentNotifs] =
@@ -30,6 +30,14 @@ export async function deactivateTrackerById(id: number) {
   await deactivateTracker(id)
 }
 
+export async function activateTrackerById(id: number) {
+  await activateTracker(id)
+}
+
 export async function banUserById(id: number) {
   await banUser(id)
+}
+
+export async function unbanUserById(id: number) {
+  await unbanUser(id)
 }

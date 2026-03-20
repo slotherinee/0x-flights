@@ -18,6 +18,7 @@ export type AdminPageViewModel = {
     activeTrackerCount: number
     joinedDate: string
     canBan: boolean
+    canUnban: boolean
   }>
   allTrackers: Array<{
     id: number

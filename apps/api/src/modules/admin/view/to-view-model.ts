@@ -24,6 +24,7 @@ export function toViewModel(data: AdminPageData, styles: string): AdminPageViewM
       activeTrackerCount: Number(u.activeTrackerCount ?? 0),
       joinedDate: new Date(u.createdAt).toLocaleDateString(),
       canBan: Number(u.activeTrackerCount ?? 0) > 0,
+      canUnban: Number(u.trackerCount ?? 0) > 0 && Number(u.activeTrackerCount ?? 0) === 0,
     })),
     allTrackers: allTrackers.map((t) => ({
       id: t.id,

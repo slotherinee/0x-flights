@@ -10,6 +10,14 @@ export async function deactivateTracker(trackerId: number) {
   await getDb().update(trackers).set({ isActive: false }).where(eq(trackers.id, trackerId))
 }
 
+export async function activateTracker(trackerId: number) {
+  await getDb().update(trackers).set({ isActive: true }).where(eq(trackers.id, trackerId))
+}
+
 export async function banUser(userId: number) {
   await getDb().update(trackers).set({ isActive: false }).where(eq(trackers.userId, userId))
+}
+
+export async function unbanUser(userId: number) {
+  await getDb().update(trackers).set({ isActive: true }).where(eq(trackers.userId, userId))
 }

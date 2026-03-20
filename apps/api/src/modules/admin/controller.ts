@@ -1,7 +1,14 @@
 import { Elysia } from 'elysia'
 import { adminAuthMiddleware } from './auth'
 import { renderAdminPage } from './view'
-import { getAdminPageData, runPriceWorkerNow, deactivateTrackerById, banUserById } from './service'
+import {
+  getAdminPageData,
+  runPriceWorkerNow,
+  deactivateTrackerById,
+  activateTrackerById,
+  banUserById,
+  unbanUserById,
+} from './service'
 
 export const adminRoutes = new Elysia({ prefix: '/adminpage' })
   .use(adminAuthMiddleware)
@@ -23,7 +30,17 @@ export const adminRoutes = new Elysia({ prefix: '/adminpage' })
     return new Response(null, { status: 302, headers: { Location: '/adminpage' } })
   })
 
+  .post('/trackers/:id/activate', async ({ params }) => {
+    await activateTrackerById(Number(params.id))
+    return new Response(null, { status: 302, headers: { Location: '/adminpage' } })
+  })
+
   .post('/users/:id/ban', async ({ params }) => {
     await banUserById(Number(params.id))
+    return new Response(null, { status: 302, headers: { Location: '/adminpage' } })
+  })
+
+  .post('/users/:id/unban', async ({ params }) => {
+    await unbanUserById(Number(params.id))
     return new Response(null, { status: 302, headers: { Location: '/adminpage' } })
   })
