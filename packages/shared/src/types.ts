@@ -18,6 +18,7 @@ export interface Tracker {
   origin: string
   destination: string
   departureDate: string
+  returnDate: string | null
   priceThreshold: number
   currency: string
   adults: number
@@ -58,6 +59,7 @@ export interface NotificationJob {
   origin: string
   destination: string
   departureDate: string
+  returnDate: string | null
   price: number
   currency: string
   threshold: number
@@ -69,6 +71,7 @@ export interface CreateTrackerDto {
   origin: string
   destination: string
   departureDate: string
+  returnDate?: string | null
   priceThreshold: number
   currency?: string
   adults?: number

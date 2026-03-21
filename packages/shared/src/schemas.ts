@@ -17,6 +17,11 @@ export const createTrackerSchema = z.object({
   origin: iataCode,
   destination: iataCode,
   departureDate: dateString,
+  returnDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD')
+    .optional()
+    .nullable(),
   priceThreshold: z.number().positive(),
   currency: z.string().length(3).default('USD'),
   adults: z.number().int().min(1).max(9).default(1),

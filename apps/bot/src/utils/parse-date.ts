@@ -70,19 +70,19 @@ export function parseHumanDate(input: string): string | null {
 
   // DD.MM.YYYY or DD/MM/YYYY
   const dmyFull = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/)
-  if (dmyFull) return toISO(+dmyFull[3], +dmyFull[2], +dmyFull[1])
+  if (dmyFull) return toISO(+(dmyFull[3]!), +(dmyFull[2]!), +(dmyFull[1]!))
 
   // DD.MM (no year)
   const dmShort = s.match(/^(\d{1,2})[./](\d{1,2})$/)
-  if (dmShort) return smartYear(+dmShort[2], +dmShort[1])
+  if (dmShort) return smartYear(+(dmShort[2]!), +(dmShort[1]!))
 
   // Russian: "12 декабря [2026]" / "12го декабря [2026]" / "12-го декабря [2026]"
   const ruDayMonth = s.match(/^(\d{1,2})(?:-?(?:го|е|ого|ому|ой|ем))?\s+([а-яёА-ЯЁ]+)(?:\s+(\d{4}))?$/i)
   if (ruDayMonth) {
-    const month = matchMonth(ruDayMonth[2], RU_MONTHS)
+    const month = matchMonth(ruDayMonth[2]!, RU_MONTHS)
     if (month) {
-      const day = +ruDayMonth[1]
-      const year = ruDayMonth[3] ? +ruDayMonth[3] : null
+      const day = +(ruDayMonth[1]!)
+      const year = ruDayMonth[3] ? +(ruDayMonth[3]) : null
       return year ? toISO(year, month, day) : smartYear(month, day)
     }
   }
@@ -90,10 +90,10 @@ export function parseHumanDate(input: string): string | null {
   // Russian: "декабря 12 [2026]" / "декабрь 12го [2026]"
   const ruMonthDay = s.match(/^([а-яёА-ЯЁ]+)\s+(\d{1,2})(?:-?(?:го|е|ого|ому|ой|ем))?(?:\s+(\d{4}))?$/i)
   if (ruMonthDay) {
-    const month = matchMonth(ruMonthDay[1], RU_MONTHS)
+    const month = matchMonth(ruMonthDay[1]!, RU_MONTHS)
     if (month) {
-      const day = +ruMonthDay[2]
-      const year = ruMonthDay[3] ? +ruMonthDay[3] : null
+      const day = +(ruMonthDay[2]!)
+      const year = ruMonthDay[3] ? +(ruMonthDay[3]) : null
       return year ? toISO(year, month, day) : smartYear(month, day)
     }
   }
@@ -101,10 +101,10 @@ export function parseHumanDate(input: string): string | null {
   // English: "12 december [2026]" / "12th december [2026]"
   const enDayMonth = s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-zA-Z]+)(?:\s+(\d{4}))?$/)
   if (enDayMonth) {
-    const month = matchMonth(enDayMonth[2], EN_MONTHS)
+    const month = matchMonth(enDayMonth[2]!, EN_MONTHS)
     if (month) {
-      const day = +enDayMonth[1]
-      const year = enDayMonth[3] ? +enDayMonth[3] : null
+      const day = +(enDayMonth[1]!)
+      const year = enDayMonth[3] ? +(enDayMonth[3]) : null
       return year ? toISO(year, month, day) : smartYear(month, day)
     }
   }
@@ -112,10 +112,10 @@ export function parseHumanDate(input: string): string | null {
   // English: "december 12 [2026]" / "december 12th [2026]"
   const enMonthDay = s.match(/^([a-zA-Z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?$/)
   if (enMonthDay) {
-    const month = matchMonth(enMonthDay[1], EN_MONTHS)
+    const month = matchMonth(enMonthDay[1]!, EN_MONTHS)
     if (month) {
-      const day = +enMonthDay[2]
-      const year = enMonthDay[3] ? +enMonthDay[3] : null
+      const day = +(enMonthDay[2]!)
+      const year = enMonthDay[3] ? +(enMonthDay[3]) : null
       return year ? toISO(year, month, day) : smartYear(month, day)
     }
   }

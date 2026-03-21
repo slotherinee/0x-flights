@@ -9,7 +9,10 @@ export type TrackStep =
   | 'AWAITING_CURRENCY'
   | 'AWAITING_ORIGIN_CITY'
   | 'AWAITING_DESTINATION_CITY'
+  | 'AWAITING_TRIP_TYPE'
   | 'AWAITING_DATE'
+  | 'AWAITING_RETURN_DATE'
+  | 'AWAITING_PASSENGERS'
   | 'AWAITING_THRESHOLD'
 
 export interface ConversationState {
@@ -21,7 +24,10 @@ export interface ConversationState {
   destination?: string
   originCity?: string
   destinationCity?: string
+  tripType?: 'oneway' | 'roundtrip'
   departureDate?: string
+  returnDate?: string
+  adults?: number
 }
 
 const TTL = 600 // 10 minutes

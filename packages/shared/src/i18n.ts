@@ -21,7 +21,12 @@ export function buildLocalizedNotificationMessage(
   job: NotificationJob,
   lang: UserLanguage,
 ): string {
+  const dateLabel = job.returnDate
+    ? `${job.departureDate} → ${job.returnDate}`
+    : job.departureDate
+
   if (lang === 'ru') {
+    const tripLabel = job.returnDate ? '🔄 Туда-обратно' : '✈️ В одну сторону'
     const diffLine =
       job.previousPrice != null && job.previousPrice !== job.price
         ? `📉 Изменение: *${job.previousPrice > job.price ? '-' : '+'}${Math.abs(Math.round((job.previousPrice - job.price) * 100) / 100)} ${job.currency}* (было ${job.previousPrice})\n`
@@ -29,7 +34,7 @@ export function buildLocalizedNotificationMessage(
     return (
       `🚨 *Снижение цены!*\n\n` +
       `✈️ *${job.origin} → ${job.destination}*\n` +
-      `📅 ${job.departureDate}\n` +
+      `📅 ${dateLabel}  ${tripLabel}\n` +
       `💰 Текущая цена: *${job.price} ${job.currency}*\n` +
       diffLine +
       `🎯 Ваш порог: ${job.threshold} ${job.currency}\n\n` +
@@ -37,6 +42,7 @@ export function buildLocalizedNotificationMessage(
     )
   }
 
+  const tripLabel = job.returnDate ? '🔄 Round-trip' : '✈️ One-way'
   const diffLine =
     job.previousPrice != null && job.previousPrice !== job.price
       ? `📉 Change: *${job.previousPrice > job.price ? '-' : '+'}${Math.abs(Math.round((job.previousPrice - job.price) * 100) / 100)} ${job.currency}* (was ${job.previousPrice})\n`
@@ -44,7 +50,7 @@ export function buildLocalizedNotificationMessage(
   return (
     `🚨 *Price Alert!*\n\n` +
     `✈️ *${job.origin} → ${job.destination}*\n` +
-    `📅 ${job.departureDate}\n` +
+    `📅 ${dateLabel}  ${tripLabel}\n` +
     `💰 Current price: *${job.price} ${job.currency}*\n` +
     diffLine +
     `🎯 Your threshold: ${job.threshold} ${job.currency}\n\n` +

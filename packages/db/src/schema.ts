@@ -34,6 +34,7 @@ export const trackers = pgTable(
     origin: char('origin', { length: 3 }).notNull(),
     destination: char('destination', { length: 3 }).notNull(),
     departureDate: date('departure_date').notNull(),
+    returnDate: date('return_date'),
     priceThreshold: numeric('price_threshold', { precision: 10, scale: 2 }).notNull(),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
     adults: smallint('adults').notNull().default(1),

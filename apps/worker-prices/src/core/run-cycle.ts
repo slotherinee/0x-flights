@@ -44,6 +44,7 @@ function toNotificationJob(
     origin: pending.tracker.origin,
     destination: pending.tracker.destination,
     departureDate: pending.tracker.departureDate,
+    returnDate: pending.tracker.returnDate,
     price: pending.price,
     currency: pending.currency,
     threshold: pending.tracker.priceThreshold,
@@ -89,6 +90,7 @@ export async function runPriceCycle({
         origin: sample.origin,
         destination: sample.destination,
         departureDate: sample.departureDate,
+        returnDate: sample.returnDate,
         adults: sample.adults,
         currency: 'USD',
       })

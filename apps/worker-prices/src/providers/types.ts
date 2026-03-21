@@ -2,6 +2,7 @@ export interface FlightSearchParams {
   origin: string
   destination: string
   departureDate: string
+  returnDate?: string | null
   adults?: number
   currency?: string
 }
