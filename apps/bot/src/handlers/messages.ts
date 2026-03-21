@@ -2,9 +2,7 @@ import type TelegramBot from 'node-telegram-bot-api'
 import { getState, setState, clearState } from '../state/conversation'
 import { cancelKeyboard } from '../keyboards'
 import { apiCreateTracker } from '../api-client'
-import { examples, formatCityLabel, resolveCityToIata } from '../utils'
-
-const DATE = /^\d{4}-\d{2}-\d{2}$/
+import { examples, formatCityLabel, resolveCityToIata, parseHumanDate } from '../utils'
 
 function formatMoney(value: number, currency: string, lang: 'en' | 'ru'): string {
   const locale = lang === 'ru' ? 'ru-RU' : 'en-US'
@@ -102,24 +100,28 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
       await bot.sendMessage(
         chatId,
         lang === 'ru'
-          ? `✅ Прибытие: *${formatCityLabel(iata, 'ru')}*\n\n📅 Введите *дату вылета* (YYYY-MM-DD):`
-          : `✅ Destination: *${formatCityLabel(iata, 'en')}*\n\n📅 Enter *departure date* (YYYY-MM-DD):`,
+          ? `✅ Прибытие: *${formatCityLabel(iata, 'ru')}*\n\n📅 Введите *дату вылета*:\n_Например: 15 июня, 15.06.2026, июнь 15го_`
+          : `✅ Destination: *${formatCityLabel(iata, 'en')}*\n\n📅 Enter *departure date*:\n_E.g.: 15 june, 15.06.2026, june 15th_`,
         { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
       )
       break
     }
 
     case 'AWAITING_DATE': {
-      if (!DATE.test(text)) {
-        await bot.sendMessage(chatId, lang === 'ru' ? '❌ Неверная дата. Используйте `YYYY-MM-DD`' : '❌ Invalid date. Use `YYYY-MM-DD`', {
-          parse_mode: 'Markdown',
-          reply_markup: cancelKeyboard,
-        })
+      const parsed = parseHumanDate(text)
+      if (!parsed) {
+        await bot.sendMessage(
+          chatId,
+          lang === 'ru'
+            ? '❌ Не удалось распознать дату. Попробуйте:\n`15 июня`, `15.06.2026`, `июнь 15го`, `2026-06-15`'
+            : '❌ Could not parse the date. Try:\n`15 june`, `15.06.2026`, `june 15th`, `2026-06-15`',
+          { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
+        )
         return
       }
       const minDate = new Date()
       minDate.setDate(minDate.getDate() + 2)
-      if (text < minDate.toISOString().slice(0, 10)) {
+      if (parsed < minDate.toISOString().slice(0, 10)) {
         await bot.sendMessage(
           chatId,
           lang === 'ru'
@@ -129,12 +131,12 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         )
         return
       }
-      await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', departureDate: text })
+      await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', departureDate: parsed })
       await bot.sendMessage(
         chatId,
         lang === 'ru'
-          ? `✅ Дата вылета: *${text}*\n\n💰 Введите *максимальную цену* (например, \`350\`):`
-          : `✅ Departure: *${text}*\n\n💰 Enter *max price* (e.g. \`350\`):`,
+          ? `✅ Дата вылета: *${parsed}*\n\n💰 Введите *максимальную цену* (например, \`350\`):`
+          : `✅ Departure: *${parsed}*\n\n💰 Enter *max price* (e.g. \`350\`):`,
         { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
       )
       break
