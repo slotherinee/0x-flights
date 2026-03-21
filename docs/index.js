@@ -15,7 +15,7 @@ const revealObserver = new IntersectionObserver(
         revealObserver.unobserve(e.target)
       }
     }),
-  { threshold: 0.12 }
+  { threshold: 0.12 },
 )
 
 document
@@ -54,7 +54,7 @@ const counterObserver = new IntersectionObserver(
         counterObserver.unobserve(e.target)
       }
     }),
-  { threshold: 0.5 }
+  { threshold: 0.5 },
 )
 
 document.querySelectorAll('.stat-num').forEach((el) => counterObserver.observe(el))
@@ -180,3 +180,33 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     window.scrollTo({ top: offset, behavior: 'smooth' })
   })
 })
+
+/* ── Demo chat activation ──────────────────── */
+;(function () {
+  const body = document.getElementById('demoBody')
+  if (!body) return
+
+  const obs = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          body.classList.add('active')
+          obs.unobserve(e.target)
+        }
+      }),
+    { threshold: 0.4 },
+  )
+  obs.observe(body)
+})()
+
+/* ── FAQ accordion ─────────────────────────── */
+;(function () {
+  document.querySelectorAll('.faq-q').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item')
+      const isOpen = item.classList.contains('open')
+      document.querySelectorAll('.faq-item').forEach((el) => el.classList.remove('open'))
+      if (!isOpen) item.classList.add('open')
+    })
+  })
+})()

@@ -944,7 +944,6 @@ ul {
   padding: 56px 0;
   background: var(--light);
   border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
   position: relative;
   overflow: hidden;
 }
@@ -1586,6 +1585,9 @@ ul {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .stats-bar {
+    border-bottom: 1px solid var(--border);
+  }
   .stat-cell {
     border-right: none;
   }
@@ -1643,5 +1645,426 @@ ul {
   }
   .hero-actions {
     justify-content: center;
+  }
+}
+
+/* ============================================
+   TICKER SECTION
+   ============================================ */
+
+@keyframes ticker-ltr {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+@keyframes ticker-rtl {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.ticker-section {
+  padding: 36px 0 32px;
+  background: var(--light);
+  overflow: hidden;
+  position: relative;
+}
+
+.ticker-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mid);
+  margin-bottom: 18px;
+}
+
+.ticker-wrap {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  margin-bottom: 10px;
+}
+.ticker-wrap:last-child {
+  margin-bottom: 0;
+}
+
+.ticker-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  will-change: transform;
+}
+.t-ltr {
+  animation: ticker-ltr 32s linear infinite;
+}
+.t-rtl {
+  animation: ticker-rtl 26s linear infinite;
+}
+
+@media (hover: hover) {
+  .ticker-wrap:hover .ticker-track {
+    animation-play-state: paused;
+  }
+}
+
+.tick-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 8px 18px 8px 14px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tick-iata {
+  font-family: 'Unbounded', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: 0.02em;
+}
+.tick-price {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mid);
+}
+.tick-pct {
+  background: #e4f9f0;
+  color: #00a264;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+/* ============================================
+   BOT COMMANDS SECTION
+   ============================================ */
+
+.commands-section {
+  padding: 100px 0;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.commands-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+  direction: rtl;
+}
+.commands-layout > * {
+  direction: ltr;
+}
+
+.commands-text p {
+  color: var(--mid);
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 20px 0 32px;
+}
+
+.cmd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--light);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+@media (hover: hover) {
+  .cmd-item:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+}
+
+.cmd-tag {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(22, 104, 220, 0.08);
+  padding: 3px 10px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  min-width: 82px;
+}
+
+.cmd-desc {
+  font-size: 13px;
+  color: var(--mid);
+  font-weight: 500;
+}
+
+/* Demo chat phone */
+.commands-chat {
+  display: flex;
+  justify-content: center;
+}
+
+/* Reuse tg-phone but need a demo body */
+.demo-body {
+  padding: 14px 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 220px;
+  overflow: hidden;
+}
+
+.demo-msg {
+  max-width: 88%;
+  font-size: 12.5px;
+  line-height: 1.55;
+  padding: 9px 13px;
+  border-radius: 14px;
+  opacity: 0;
+}
+.demo-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--white);
+  border-bottom-right-radius: 4px;
+}
+.demo-bot {
+  align-self: flex-start;
+  background: var(--light);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+/* Typing dots */
+.demo-typing {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 11px 14px;
+  background: var(--light);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  opacity: 0;
+}
+.demo-typing span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mid);
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+.demo-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.demo-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes msg-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Activated state — play staggered animations */
+.demo-body.active .dm-1 {
+  animation: msg-appear 0.35s ease 0.15s forwards;
+}
+.demo-body.active .dm-2 {
+  animation: msg-appear 0.35s ease 0.85s forwards;
+}
+.demo-body.active .dm-3 {
+  animation: msg-appear 0.35s ease 1.7s forwards;
+}
+.demo-body.active .dm-4 {
+  animation: msg-appear 0.35s ease 2.4s forwards;
+}
+.demo-body.active .dm-5 {
+  animation: msg-appear 0.3s ease 3.2s forwards;
+}
+
+/* sp-g plane */
+.sp-g {
+  top: 18%;
+  animation: fly-across 28s linear infinite;
+  animation-delay: -6s;
+  --ty: 0;
+  --op: 0.05;
+  font-size: 14px;
+}
+
+/* ============================================
+   FAQ SECTION
+   ============================================ */
+
+.faq-section {
+  padding: 100px 0 110px;
+  background: var(--light);
+  position: relative;
+}
+
+.faq-list {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faq-item {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition:
+    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.faq-item.open {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(22, 104, 220, 0.08);
+}
+
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  transition: color 0.2s;
+}
+@media (hover: hover) {
+  .faq-q:hover {
+    color: var(--accent);
+  }
+}
+
+.faq-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--mid);
+  transition:
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.25s;
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+
+.faq-a {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.faq-item.open .faq-a {
+  grid-template-rows: 1fr;
+}
+.faq-a > div {
+  overflow: hidden;
+}
+.faq-a > div > p {
+  padding: 4px 22px 22px;
+  font-size: 15px;
+  color: var(--mid);
+  line-height: 1.7;
+}
+.faq-a code {
+  font-family: 'SFMono-Regular', 'Consolas', monospace;
+  font-size: 13px;
+  background: rgba(22, 104, 220, 0.08);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   RESPONSIVE — new sections
+   ============================================ */
+
+@media (max-width: 768px) {
+  .commands-layout {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .commands-chat {
+    order: -1;
+  }
+  .faq-q {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ticker-section {
+    padding: 28px 0 24px;
+  }
+  .commands-section {
+    padding: 72px 0;
+  }
+  .faq-section {
+    padding: 72px 0 80px;
   }
 }
