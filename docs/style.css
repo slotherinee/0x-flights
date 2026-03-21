@@ -1629,6 +1629,13 @@ ul {
     font-size: 15px;
     padding: 15px 24px;
   }
+  .footer-row {
+    align-items: flex-start;
+  }
+  .footer-row,
+  .footer-nav {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 430px) {
