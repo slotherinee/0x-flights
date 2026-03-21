@@ -117,6 +117,18 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         })
         return
       }
+      const minDate = new Date()
+      minDate.setDate(minDate.getDate() + 2)
+      if (text < minDate.toISOString().slice(0, 10)) {
+        await bot.sendMessage(
+          chatId,
+          lang === 'ru'
+            ? `❌ Дата слишком близко. Трекер можно создать минимум на послезавтра (${minDate.toISOString().slice(0, 10)}).`
+            : `❌ Date too soon. Tracker can only be created for the day after tomorrow or later (${minDate.toISOString().slice(0, 10)}).`,
+          { reply_markup: cancelKeyboard },
+        )
+        return
+      }
       await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', departureDate: text })
       await bot.sendMessage(
         chatId,

@@ -61,6 +61,7 @@ export interface NotificationJob {
   price: number
   currency: string
   threshold: number
+  previousPrice?: number | null
 }
 
 export interface CreateTrackerDto {

@@ -2,7 +2,7 @@ import { Queue } from 'bullmq'
 import cron from 'node-cron'
 import { Redis } from 'ioredis'
 import { getRedisConfig } from '@0x-flights/config'
-import { closeDb } from '@0x-flights/db'
+import { closeDb, expirePreDepartureTrackers } from '@0x-flights/db'
 import { QUEUE_NAMES } from '@0x-flights/shared'
 import type { NotificationJob } from '@0x-flights/shared'
 import { createFlightProvider } from './providers'
@@ -41,6 +41,16 @@ const scheduledTask = cron.schedule(
   { timezone: MOSCOW_TZ },
 )
 
+const expireTrackersTask = cron.schedule(
+  '0 9 * * *',
+  async () => {
+    console.log('[PriceWorker] Expiring pre-departure trackers...')
+    const count = await expirePreDepartureTrackers()
+    console.log(`[PriceWorker] Expired ${count} trackers departing tomorrow or earlier`)
+  },
+  { timezone: MOSCOW_TZ },
+)
+
 const fxRefreshTask = cron.schedule(
   '0 12 * * *',
   async () => {
@@ -66,6 +76,8 @@ const shutdown = async () => {
   console.log('[PriceWorker] Shutting down...')
   scheduledTask.stop()
   scheduledTask.destroy()
+  expireTrackersTask.stop()
+  expireTrackersTask.destroy()
   fxRefreshTask.stop()
   fxRefreshTask.destroy()
   await notifQueue.close()

@@ -1,4 +1,4 @@
-import { eq, and, gte, desc, sql } from 'drizzle-orm'
+import { eq, and, gte, lte, desc, sql } from 'drizzle-orm'
 import { getDb } from '../client'
 import { trackers } from '../schema'
 import type { Tracker, TrackerResponse, CreateTrackerDto } from '@0x-flights/shared'
@@ -71,6 +71,19 @@ export async function getActiveTrackers(): Promise<Tracker[]> {
     .from(trackers)
     .where(and(eq(trackers.isActive, true), gte(trackers.departureDate, today)))
   return rows.map(toTracker)
+}
+
+export async function expirePreDepartureTrackers(): Promise<number> {
+  const today = new Date()
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = tomorrow.toISOString().slice(0, 10)
+  const result = await getDb()
+    .update(trackers)
+    .set({ isActive: false })
+    .where(and(eq(trackers.isActive, true), lte(trackers.departureDate, tomorrowStr)))
+    .returning({ id: trackers.id })
+  return result.length
 }
 
 export async function softDeleteTracker(id: number, userId: number): Promise<boolean> {

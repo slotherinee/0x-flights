@@ -1,6 +1,6 @@
 import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
-import { getActiveTrackers, insertPricesBatch } from '@0x-flights/db'
+import { getActiveTrackers, insertPricesBatch, getLastSentNotificationPrices } from '@0x-flights/db'
 import type { NotificationJob, Tracker } from '@0x-flights/shared'
 import type { FlightProvider } from '../providers'
 import { groupTrackersByRoute } from './group-trackers'
@@ -26,22 +26,28 @@ async function markLastRun(redis: Redis) {
   await redis.set(LAST_RUN_KEY, new Date().toISOString())
 }
 
+type PendingNotification = {
+  tracker: Tracker
+  telegramId: string
+  price: number
+  currency: string
+}
+
 function toNotificationJob(
-  tracker: Tracker,
-  telegramId: string,
-  price: number,
-  currency: string,
+  pending: PendingNotification,
+  previousPrice: number | null,
 ): NotificationJob {
   return {
-    trackerId: tracker.id,
-    userId: tracker.userId,
-    telegramId,
-    origin: tracker.origin,
-    destination: tracker.destination,
-    departureDate: tracker.departureDate,
-    price,
-    currency,
-    threshold: tracker.priceThreshold,
+    trackerId: pending.tracker.id,
+    userId: pending.tracker.userId,
+    telegramId: pending.telegramId,
+    origin: pending.tracker.origin,
+    destination: pending.tracker.destination,
+    departureDate: pending.tracker.departureDate,
+    price: pending.price,
+    currency: pending.currency,
+    threshold: pending.tracker.priceThreshold,
+    previousPrice,
   }
 }
 
@@ -71,7 +77,7 @@ export async function runPriceCycle({
 
   const userMap = await loadUserTelegramMap()
   const priceRecords: PriceRecord[] = []
-  const notificationJobs: NotificationJob[] = []
+  const pendingNotifications: PendingNotification[] = []
 
   for (const [key, group] of groups) {
     const sample = group[0]
@@ -117,12 +123,17 @@ export async function runPriceCycle({
       if (converted <= tracker.priceThreshold) {
         const telegramId = userMap.get(tracker.userId)
         if (!telegramId) continue
-        notificationJobs.push(
-          toNotificationJob(tracker, telegramId, converted, tracker.currency),
-        )
+        pendingNotifications.push({ tracker, telegramId, price: converted, currency: tracker.currency })
       }
     }
   }
+
+  const prevPrices = await getLastSentNotificationPrices(
+    pendingNotifications.map((n) => n.tracker.id),
+  )
+  const notificationJobs: NotificationJob[] = pendingNotifications.map((pending) =>
+    toNotificationJob(pending, prevPrices.get(pending.tracker.id) ?? null),
+  )
 
   if (priceRecords.length) {
     await insertPricesBatch(priceRecords)

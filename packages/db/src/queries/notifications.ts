@@ -1,4 +1,4 @@
-import { inArray } from 'drizzle-orm'
+import { inArray, isNotNull, desc, and } from 'drizzle-orm'
 import { getDb } from '../client'
 import { notifications } from '../schema'
 import type { Notification } from '@0x-flights/shared'
@@ -31,6 +31,24 @@ export async function createNotification(data: {
     sentAt: r.sentAt ?? null,
     createdAt: r.createdAt,
   }
+}
+
+export async function getLastSentNotificationPrices(
+  trackerIds: number[],
+): Promise<Map<number, number>> {
+  if (!trackerIds.length) return new Map()
+  const rows = await getDb()
+    .select({ trackerId: notifications.trackerId, price: notifications.price })
+    .from(notifications)
+    .where(and(inArray(notifications.trackerId, trackerIds), isNotNull(notifications.sentAt)))
+    .orderBy(desc(notifications.sentAt))
+  const map = new Map<number, number>()
+  for (const row of rows) {
+    if (!map.has(row.trackerId)) {
+      map.set(row.trackerId, Number(row.price))
+    }
+  }
+  return map
 }
 
 export async function markNotificationsSent(ids: number[]): Promise<void> {
