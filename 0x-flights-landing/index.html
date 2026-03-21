@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0x-flights — Умный мониторинг цен на авиабилеты</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="#" class="logo">
+                <span class="logo-0x">0x</span><span class="logo-flights">-flights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#how">Как работает</a></li>
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#notify">Уведомления</a></li>
+            </ul>
+            <a href="https://t.me/oxflights_bot" class="btn-nav" target="_blank" rel="noopener">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                Открыть бота
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-glow"></div>
+            <div class="grid-dots"></div>
+            <div class="cloud-layer cloud-layer-1" data-parallax="0.08">
+                <svg class="cloud-svg c1a" viewBox="0 0 220 72" xmlns="http://www.w3.org/2000/svg"><path d="M40,56 Q16,56 16,40 Q16,26 30,24 Q32,10 50,8 Q62,2 76,12 Q86,4 100,10 Q112,4 126,14 Q142,12 146,28 Q160,28 160,42 Q160,56 144,56 Z"/></svg>
+                <svg class="cloud-svg c1b" viewBox="0 0 200 58" xmlns="http://www.w3.org/2000/svg"><path d="M30,46 Q12,46 12,34 Q12,22 24,22 Q26,12 40,10 Q50,4 62,12 Q72,6 86,12 Q98,6 112,14 Q126,12 130,24 Q142,22 144,34 Q146,46 130,46 Z"/></svg>
+                <svg class="cloud-svg c1c" viewBox="0 0 190 62" xmlns="http://www.w3.org/2000/svg"><path d="M32,50 Q12,50 12,36 Q12,22 26,22 Q28,10 44,8 Q56,2 68,10 Q80,4 94,10 Q108,6 112,18 Q126,16 128,30 Q130,44 114,48 Z"/></svg>
+            </div>
+            <div class="cloud-layer cloud-layer-2" data-parallax="0.15">
+                <svg class="cloud-svg c2a" viewBox="0 0 240 76" xmlns="http://www.w3.org/2000/svg"><path d="M44,60 Q18,60 18,44 Q18,30 34,28 Q34,14 52,10 Q64,2 80,12 Q92,4 108,12 Q120,4 138,14 Q154,10 160,24 Q176,22 180,36 Q184,52 166,58 Q162,64 148,60 Q132,66 116,60 Q98,66 80,60 Q62,66 50,60 Z"/></svg>
+                <svg class="cloud-svg c2b" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg"><path d="M28,48 Q10,48 10,34 Q10,22 22,20 Q24,10 38,8 Q48,2 58,10 Q68,4 80,10 Q90,4 102,12 Q116,10 118,22 Q130,22 132,34 Q134,46 118,48 Z"/></svg>
+                <svg class="cloud-svg c2c" viewBox="0 0 210 68" xmlns="http://www.w3.org/2000/svg"><path d="M36,54 Q14,54 14,38 Q14,24 28,22 Q30,8 48,6 Q60,0 74,10 Q86,4 100,10 Q114,4 128,14 Q144,12 146,26 Q160,26 162,40 Q164,54 146,54 Z"/></svg>
+            </div>
+            <div class="cloud-layer cloud-layer-3" data-parallax="0.25">
+                <svg class="cloud-svg c3a" viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg"><path d="M34,52 Q14,52 14,38 Q14,26 26,24 Q26,12 42,8 Q54,2 66,10 Q76,4 90,10 Q102,6 114,14 Q126,12 130,24 Q142,24 144,36 Q146,50 130,52 Z"/></svg>
+                <svg class="cloud-svg c3b" viewBox="0 0 175 58" xmlns="http://www.w3.org/2000/svg"><path d="M28,46 Q10,46 10,32 Q10,20 22,18 Q24,8 38,6 Q48,0 60,8 Q70,2 82,8 Q94,2 106,12 Q120,10 122,22 Q134,22 134,34 Q134,46 120,46 Z"/></svg>
+            </div>
+            <span class="fly-plane fly-1">✈</span>
+            <span class="fly-plane fly-2">✈</span>
+            <span class="fly-plane fly-3">✈</span>
+        </div>
+
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="pulse-dot"></span>
+                        Мониторинг в реальном времени
+                    </div>
+                    <h1 class="hero-title">
+                        <span class="line-wrap"><span class="line-inner">Следи за ценами.</span></span>
+                        <span class="line-wrap"><span class="line-inner delay-1">Лети выгодно.</span></span>
+                    </h1>
+                    <p class="hero-sub">
+                        Добавь маршрут в Telegram-бота — и получай мгновенные уведомления, когда цена упала. Без лишнего, только нужное.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="https://t.me/oxflights_bot" class="btn-primary" target="_blank" rel="noopener">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                            Начать в Telegram
+                        </a>
+                        <a href="#how" class="btn-ghost">Как это работает <span class="btn-arrow">✈</span></a>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="card-stack">
+                        <div class="price-card card-back">
+                            <div class="card-route">
+                                <span class="iata">LED</span>
+                                <div class="route-arc-wrap">
+                                    <svg class="route-arc-svg" viewBox="0 0 110 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path id="arc-led-aer" d="M4,24 C28,-6 82,-6 106,24" stroke="#E8E8F0" stroke-width="1.5" stroke-dasharray="3 4"/>
+                                        <path d="M0,-3.5 L7,0 L0,3.5 L2,0 Z" fill="#1668dc">
+                                            <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto">
+                                                <mpath href="#arc-led-aer"/>
+                                            </animateMotion>
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="iata">AER</span>
+                            </div>
+                            <div class="card-prices">
+                                <span class="old-p">12 800 ₽</span>
+                                <span class="new-p">8 450 ₽</span>
+                                <span class="pct-badge">−34%</span>
+                            </div>
+                        </div>
+                        <div class="price-card card-front">
+                            <div class="card-route">
+                                <span class="iata">MOW</span>
+                                <div class="route-arc-wrap">
+                                    <svg class="route-arc-svg" viewBox="0 0 110 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path id="arc-mow-kzn" d="M4,24 C28,-6 82,-6 106,24" stroke="#E8E8F0" stroke-width="1.5" stroke-dasharray="3 4"/>
+                                        <path d="M0,-3.5 L7,0 L0,3.5 L2,0 Z" fill="#1668dc">
+                                            <animateMotion dur="2.6s" repeatCount="indefinite" rotate="auto">
+                                                <mpath href="#arc-mow-kzn"/>
+                                            </animateMotion>
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="iata">KZN</span>
+                            </div>
+                            <div class="card-prices">
+                                <span class="old-p">5 200 ₽</span>
+                                <span class="new-p">3 100 ₽</span>
+                                <span class="pct-badge">−40%</span>
+                            </div>
+                            <div class="card-live">
+                                <span class="live-dot"></span>live
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats-bar">
+        <span class="sec-plane sp-a">✈</span>
+        <span class="sec-plane sp-b">✈</span>
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-cell">
+                    <div class="stat-num" data-target="12847">0</div>
+                    <div class="stat-lbl">отслеживаемых маршрутов</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-num" data-target="4200">0</div>
+                    <div class="stat-lbl">пользователей</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-num" data-target="31" data-suffix="%">0</div>
+                    <div class="stat-lbl">средняя экономия</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-num" data-target="94" data-suffix="%">0</div>
+                    <div class="stat-lbl">точность уведомлений</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="how">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-tag">Просто</div>
+                <h2 class="section-title">Три шага до выгодного перелёта</h2>
+            </div>
+            <div class="steps">
+                <div class="step js-reveal">
+                    <div class="step-num">01</div>
+                    <div class="step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </div>
+                    <h3>Открой бота</h3>
+                    <p>Найди <strong>@oxflights_bot</strong> в Telegram и нажми Start. Никакой регистрации — только команды.</p>
+                </div>
+                <div class="step-connector js-reveal delay-1">
+                    <div class="connector-line">
+                        <span class="connector-plane">✈</span>
+                    </div>
+                </div>
+                <div class="step js-reveal delay-1">
+                    <div class="step-num">02</div>
+                    <div class="step-icon step-icon-plane">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                    </div>
+                    <h3>Добавь маршрут</h3>
+                    <p>Укажи откуда, куда и когда. Бот понимает даты на русском: «через неделю», «в пятницу», «15 апреля».</p>
+                </div>
+                <div class="step-connector js-reveal delay-2">
+                    <div class="connector-line">
+                        <span class="connector-plane">✈</span>
+                    </div>
+                </div>
+                <div class="step js-reveal delay-2">
+                    <div class="step-num">03</div>
+                    <div class="step-icon step-icon-bell">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </div>
+                    <h3>Получай уведомления</h3>
+                    <p>Когда цена упадёт — ты первым узнаешь. С точной суммой экономии и ссылкой на покупку.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <span class="sec-plane sp-c">✈</span>
+        <span class="sec-plane sp-d">✈</span>
+        <div class="container">
+            <div class="section-head">
+                <div class="section-tag">Возможности</div>
+                <h2 class="section-title">Всё что нужно, ничего лишнего</h2>
+            </div>
+            <div class="feat-grid">
+                <div class="feat-card js-reveal">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <h3>Мониторинг 24/7</h3>
+                    <p>Проверяем цены круглосуточно — ты не пропустишь ни одной распродажи, даже ночью.</p>
+                </div>
+                <div class="feat-card js-reveal delay-1">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    </div>
+                    <h3>Несколько маршрутов</h3>
+                    <p>Следи за множеством направлений одновременно без каких-либо ограничений.</p>
+                </div>
+                <div class="feat-card js-reveal delay-2">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <h3>История цен</h3>
+                    <p>Смотри как менялась цена за всё время наблюдения. Понимай тренды, выбирай момент.</p>
+                </div>
+                <div class="feat-card js-reveal">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <h3>₽ &nbsp;$ &nbsp;€ &nbsp;£</h3>
+                    <p>Цены в любой валюте. Актуальный курс конвертации обновляется каждый день.</p>
+                </div>
+                <div class="feat-card js-reveal delay-1">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h3>Умный ввод дат</h3>
+                    <p>«В следующую пятницу», «15 апреля», «через 2 недели» — бот поймёт что угодно.</p>
+                </div>
+                <div class="feat-card js-reveal delay-2">
+                    <div class="feat-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3>Туда-обратно</h3>
+                    <p>Отслеживай цены на оба направления сразу — оптимизируй полную стоимость поездки.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOTIFICATIONS PREVIEW -->
+    <section class="notify" id="notify">
+        <span class="sec-plane sp-e">✈</span>
+        <span class="sec-plane sp-f">✈</span>
+        <div class="container">
+            <div class="notify-layout">
+                <div class="notify-text js-reveal-left">
+                    <div class="section-tag">Уведомления</div>
+                    <h2 class="section-title">Видишь снижение — берёшь билет</h2>
+                    <p>Каждое уведомление содержит всё необходимое: маршрут, дату, новую цену и точную сумму, которую ты сэкономишь. Никакого шума.</p>
+                    <ul class="check-list">
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Мгновенная отправка при снижении цены
+                        </li>
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Точная разница: было → стало → экономия
+                        </li>
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Прямая ссылка на покупку билета
+                        </li>
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Трекер автоматически отключается после вылета
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tg-mockup js-reveal-right delay-1">
+                    <div class="tg-phone">
+                        <div class="tg-topbar">
+                            <div class="tg-back">‹</div>
+                            <div class="tg-ava">✈</div>
+                            <div class="tg-meta">
+                                <div class="tg-name">0x-flights</div>
+                                <div class="tg-online"><span class="tg-dot-online"></span>онлайн</div>
+                            </div>
+                        </div>
+                        <div class="tg-body">
+                            <div class="tg-date-sep">Сегодня</div>
+                            <div class="tg-bubble tg-bubble-anim">
+                                <div class="tg-bubble-head">
+                                    <span class="tg-emoji">🔥</span>
+                                    <span class="tg-bubble-title">Цена упала!</span>
+                                </div>
+                                <div class="tg-route">
+                                    <span class="tg-iata">MOW</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                                    <span class="tg-iata">KZN</span>
+                                    <span class="tg-bubble-date">· 15 мая</span>
+                                </div>
+                                <div class="tg-price-row">
+                                    <span class="tg-p-old">5 000 ₽</span>
+                                    <span class="tg-p-arr">→</span>
+                                    <span class="tg-p-new">3 200 ₽</span>
+                                </div>
+                                <div class="tg-economy">Экономия: −1 800 ₽ (−36%)</div>
+                                <div class="tg-btn-row">
+                                    <span class="tg-buy-btn">Купить билет →</span>
+                                </div>
+                                <div class="tg-time">14:23</div>
+                            </div>
+                            <div class="tg-bubble tg-bubble-anim2">
+                                <div class="tg-bubble-head">
+                                    <span class="tg-emoji">📊</span>
+                                    <span class="tg-bubble-title">Исторический минимум</span>
+                                </div>
+                                <div class="tg-route">
+                                    <span class="tg-iata">LED</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                                    <span class="tg-iata">AER</span>
+                                    <span class="tg-bubble-date">· 3 июля</span>
+                                </div>
+                                <div class="tg-price-row">
+                                    <span class="tg-p-old">14 200 ₽</span>
+                                    <span class="tg-p-arr">→</span>
+                                    <span class="tg-p-new">8 450 ₽</span>
+                                </div>
+                                <div class="tg-economy">Экономия: −5 750 ₽ (−40%)</div>
+                                <div class="tg-btn-row">
+                                    <span class="tg-buy-btn">Купить билет →</span>
+                                </div>
+                                <div class="tg-time">09:41</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-bg">
+            <span class="cta-fly cta-fly-1">✈</span>
+            <span class="cta-fly cta-fly-2">✈</span>
+            <span class="cta-fly cta-fly-3">✈</span>
+        </div>
+        <div class="container">
+            <div class="cta-box js-reveal">
+                <h2>Начни следить за ценами<br>прямо сейчас</h2>
+                <p>Бесплатно. Без регистрации. Только Telegram.</p>
+                <a href="https://t.me/oxflights_bot" class="btn-primary btn-xl" target="_blank" rel="noopener">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    Открыть @oxflights_bot
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-row">
+                <a href="#" class="logo logo-sm">
+                    <span class="logo-0x">0x</span><span class="logo-flights">-flights</span>
+                </a>
+                <nav class="footer-nav">
+                    <a href="#how">Как работает</a>
+                    <a href="#features">Возможности</a>
+                    <a href="https://t.me/oxflights_bot" target="_blank" rel="noopener">Бот в Telegram</a>
+                </nav>
+                <span class="footer-copy">© 2026 0x-flights</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+</html>
