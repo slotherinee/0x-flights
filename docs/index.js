@@ -15,7 +15,7 @@ const revealObserver = new IntersectionObserver(
         revealObserver.unobserve(e.target)
       }
     }),
-  { threshold: 0.12 },
+  { threshold: 0.2 },
 )
 
 document
