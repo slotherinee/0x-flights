@@ -210,3 +210,49 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     })
   })
 })()
+
+/* ── Section & hero planes (random LTR / RTL) ── */
+;(function () {
+  const isMobile = window.matchMedia('(max-width: 1024px)').matches
+
+  function spawnPlanes(container, count, cssClass) {
+    for (let i = 0; i < count; i++) {
+      const plane = document.createElement('span')
+      plane.textContent = '✈'
+      plane.classList.add(cssClass)
+
+      const rtl = Math.random() < 0.5
+      const top = 5 + Math.random() * 88
+      const size = 12 + Math.random() * 12
+      const dur = 16 + Math.random() * 18
+      const delay = -(Math.random() * dur)
+      const op = (0.05 + Math.random() * 0.07).toFixed(3)
+      const ty = ((Math.random() - 0.5) * 8).toFixed(1)
+
+      plane.style.top = top.toFixed(1) + '%'
+      plane.style.fontSize = size.toFixed(0) + 'px'
+      plane.style.animation =
+        (rtl ? 'fly-across-rtl' : 'fly-across') +
+        ' ' +
+        dur.toFixed(1) +
+        's linear ' +
+        delay.toFixed(1) +
+        's infinite'
+      plane.style.setProperty('--op', op)
+      plane.style.setProperty('--ty', ty + 'px')
+
+      container.appendChild(plane)
+    }
+  }
+
+  // Hero: 6 desktop / 3 mobile
+  const hero = document.querySelector('.hero-bg')
+  if (hero) spawnPlanes(hero, isMobile ? 3 : 6, 'fly-plane')
+
+  // Content sections: 3 desktop / 2 mobile
+  const SECTIONS = ['.stats-bar', '.features', '.commands-section', '.notify', '.faq-section']
+  SECTIONS.forEach((sel) => {
+    const section = document.querySelector(sel)
+    if (section) spawnPlanes(section, isMobile ? 2 : 3, 'sec-plane')
+  })
+})()

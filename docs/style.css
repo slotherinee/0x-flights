@@ -1959,6 +1959,7 @@ ul {
   padding: 100px 0 110px;
   background: var(--light);
   position: relative;
+  overflow: hidden;
 }
 
 .faq-list {
@@ -1999,6 +2000,11 @@ ul {
   font-weight: 600;
   color: var(--text);
   transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+}
+.faq-q:focus:not(:focus-visible) {
+  outline: none;
 }
 @media (hover: hover) {
   .faq-q:hover {
