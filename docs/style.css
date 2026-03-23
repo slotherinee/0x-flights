@@ -49,6 +49,9 @@ body {
   overflow-x: hidden;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 a {
@@ -2061,8 +2064,6 @@ select {
   font-weight: 600;
   color: var(--text);
   transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-appearance: none;
 }
 .faq-q:focus:not(:focus-visible) {
   outline: none;
@@ -2140,6 +2141,9 @@ select {
   }
   .faq-section {
     padding: 72px 0 80px;
+  }
+  .cur-btn span {
+    display: none;
   }
 }
 

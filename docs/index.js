@@ -304,6 +304,7 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
       if (idx < cells.length) {
         cells[idx].classList.remove('fd-reset')
         cells[idx].classList.add('fd-scanning')
+        window.hapticSelect && window.hapticSelect()
         idx++
         setTimeout(scanNext, STEP)
       } else {
@@ -321,6 +322,7 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
         // highlight best with pulse animation
         const best = cells[BEST_IDX]
         best.classList.add('fd-best')
+        window.hapticSelect && window.hapticSelect()
         const badge = best.querySelector('.fd-badge-top')
         if (badge) badge.style.display = ''
         best.style.animation = 'fd-found-pulse 0.9s ease 2'
