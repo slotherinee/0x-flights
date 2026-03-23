@@ -244,9 +244,8 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
       // ease-in-out cubic
-      const eased = progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2
+      const eased =
+        progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
       const w = eased * totalWidth
       rect.setAttribute('width', w.toFixed(1))
 
@@ -304,7 +303,6 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
       if (idx < cells.length) {
         cells[idx].classList.remove('fd-reset')
         cells[idx].classList.add('fd-scanning')
-        window.hapticSelect && window.hapticSelect()
         idx++
         setTimeout(scanNext, STEP)
       } else {
@@ -322,11 +320,12 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
         // highlight best with pulse animation
         const best = cells[BEST_IDX]
         best.classList.add('fd-best')
-        window.hapticSelect && window.hapticSelect()
         const badge = best.querySelector('.fd-badge-top')
         if (badge) badge.style.display = ''
         best.style.animation = 'fd-found-pulse 0.9s ease 2'
-        setTimeout(() => { best.style.animation = '' }, 1800)
+        setTimeout(() => {
+          best.style.animation = ''
+        }, 1800)
 
         afterScan && afterScan()
       }
@@ -355,14 +354,17 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
           })
 
           // 2. after appear, run scan
-          setTimeout(() => {
-            scanning = true
-            if (rescanBtn) rescanBtn.disabled = true
-            runScan(cells, () => {
-              scanning = false
-              if (rescanBtn) rescanBtn.disabled = false
-            })
-          }, cells.length * 90 + 500)
+          setTimeout(
+            () => {
+              scanning = true
+              if (rescanBtn) rescanBtn.disabled = true
+              runScan(cells, () => {
+                scanning = false
+                if (rescanBtn) rescanBtn.disabled = false
+              })
+            },
+            cells.length * 90 + 500,
+          )
         }
       }),
     { threshold: 0.3 },
@@ -394,10 +396,34 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
   if (!btns || !numEl) return
 
   const currencies = {
-    RUB: { symbol: '₽', price: '8 450', old: '12 800 ₽', save: 'Экономия: −4 350 ₽', rate: 'Курс ЦБ · обновлено сегодня' },
-    USD: { symbol: '$', price: '94',    old: '$142',      save: 'Savings: −$48',        rate: 'Exchange rate · updated today' },
-    EUR: { symbol: '€', price: '87',    old: '€131',      save: 'Économie: −44 €',      rate: 'Taux de change · mis à jour aujourd\'hui' },
-    GBP: { symbol: '£', price: '75',    old: '£113',      save: 'Savings: −£38',        rate: 'Exchange rate · updated today' },
+    RUB: {
+      symbol: '₽',
+      price: '8 450',
+      old: '12 800 ₽',
+      save: 'Экономия: −4 350 ₽',
+      rate: 'Курс ЦБ · обновлено сегодня',
+    },
+    USD: {
+      symbol: '$',
+      price: '94',
+      old: '$142',
+      save: 'Savings: −$48',
+      rate: 'Exchange rate · updated today',
+    },
+    EUR: {
+      symbol: '€',
+      price: '87',
+      old: '€131',
+      save: 'Économie: −44 €',
+      rate: "Taux de change · mis à jour aujourd'hui",
+    },
+    GBP: {
+      symbol: '£',
+      price: '75',
+      old: '£113',
+      save: 'Savings: −£38',
+      rate: 'Exchange rate · updated today',
+    },
   }
 
   const order = ['RUB', 'USD', 'EUR', 'GBP']
@@ -409,7 +435,9 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     current = cur
 
     // update active button
-    btns.querySelectorAll('.cur-btn').forEach((b) => b.classList.toggle('active', b.dataset.cur === cur))
+    btns
+      .querySelectorAll('.cur-btn')
+      .forEach((b) => b.classList.toggle('active', b.dataset.cur === cur))
 
     const data = currencies[cur]
 
@@ -422,7 +450,8 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
       numEl.textContent = data.price
       symEl.textContent = data.symbol
       if (saveEl) saveEl.textContent = data.save
-      if (oldEl) oldEl.innerHTML = data.old + ' <span class="cur-price-sym">' + data.symbol + '</span>'
+      if (oldEl)
+        oldEl.innerHTML = data.old + ' <span class="cur-price-sym">' + data.symbol + '</span>'
       const rateEl = document.getElementById('curRateNote')
       if (rateEl) rateEl.textContent = data.rate
 
@@ -502,7 +531,16 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
   if (hero) spawnPlanes(hero, isMobile ? 3 : 6, 'fly-plane')
 
   // Content sections: 3 desktop / 2 mobile
-  const SECTIONS = ['.stats-bar', '.features', '.history-section', '.commands-section', '.flex-dates-section', '.notify', '.currency-section', '.faq-section']
+  const SECTIONS = [
+    '.stats-bar',
+    '.features',
+    '.history-section',
+    '.commands-section',
+    '.flex-dates-section',
+    '.notify',
+    '.currency-section',
+    '.faq-section',
+  ]
   SECTIONS.forEach((sel) => {
     const section = document.querySelector(sel)
     if (section) spawnPlanes(section, isMobile ? 2 : 3, 'sec-plane')

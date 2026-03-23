@@ -745,7 +745,6 @@
 
         const haptics = new WebHaptics();
         const trigger = () => { try { haptics.trigger(defaultPatterns.soft); } catch (_) {} };
-        window.hapticSelect = () => { try { haptics.trigger(defaultPatterns.select); } catch (_) {} };
         document.querySelectorAll(
             'button.faq-q, button.cur-btn, button#fdRescanBtn, a:not([href^="http"])'
         ).forEach(el => el.addEventListener('click', trigger));
@@ -755,7 +754,7 @@
                 e.preventDefault();
                 trigger();
                  setTimeout(() => {
-                window.open(el.href, '_blank', 'noopener');
+                    window.open(el.href, '_blank', 'noopener');
             }, 100);
             });
            

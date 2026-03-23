@@ -348,10 +348,9 @@ select {
 }
 
 .nav.scrolled {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 1px 0 var(--border);
 }
 
 .nav-inner {
@@ -1569,9 +1568,11 @@ select {
 }
 
 .footer-nav {
-  display: flex;
+  display: grid;
   gap: 24px;
   margin-left: auto;
+  grid-template-columns: repeat(auto-fit, minmax(min(100px, 100%), 1fr));
+  width: 100%;
 }
 
 .footer-nav a {
@@ -1670,13 +1671,6 @@ select {
   .btn-xl {
     font-size: 15px;
     padding: 15px 24px;
-  }
-  .footer-row {
-    align-items: flex-start;
-  }
-  .footer-row,
-  .footer-nav {
-    flex-direction: column;
   }
 }
 
@@ -2794,6 +2788,16 @@ select {
   .fd-weekday,
   .fd-price {
     font-size: 11px;
+  }
+  .footer-row,
+  .footer-nav {
+    flex-direction: column;
+  }
+  .footer-nav {
+    gap: 12px;
+  }
+  .footer-row {
+    align-items: flex-start;
   }
 }
 
