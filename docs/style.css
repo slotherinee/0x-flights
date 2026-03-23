@@ -59,6 +59,13 @@ ul {
   list-style: none;
 }
 
+button,
+a,
+input,
+select {
+  touch-action: manipulation;
+}
+
 .container {
   max-width: 1160px;
   margin: 0 auto;
@@ -2279,8 +2286,15 @@ ul {
 }
 
 @keyframes chart-dot-pulse {
-  0%, 100% { r: 5; opacity: 1; }
-  50% { r: 8; opacity: 0.4; }
+  0%,
+  100% {
+    r: 5;
+    opacity: 1;
+  }
+  50% {
+    r: 8;
+    opacity: 0.4;
+  }
 }
 
 .c-dot-last.pulsing {
@@ -2300,7 +2314,9 @@ ul {
   white-space: nowrap;
   opacity: 0;
   transform: translateY(6px) scale(0.9);
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
@@ -2364,7 +2380,11 @@ ul {
   position: relative;
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s;
   box-shadow: var(--shadow);
 }
 
@@ -2381,13 +2401,17 @@ ul {
 .fd-cell.fd-target {
   border-color: var(--accent);
   background: rgba(22, 104, 220, 0.06);
-  box-shadow: 0 0 0 3px rgba(22, 104, 220, 0.12), var(--shadow);
+  box-shadow:
+    0 0 0 3px rgba(22, 104, 220, 0.12),
+    var(--shadow);
 }
 
 .fd-cell.fd-best {
   border-color: var(--green);
   background: rgba(0, 196, 122, 0.06);
-  box-shadow: 0 0 0 3px rgba(0, 196, 122, 0.18), var(--shadow);
+  box-shadow:
+    0 0 0 3px rgba(0, 196, 122, 0.18),
+    var(--shadow);
 }
 
 .fd-badge-top {
@@ -2429,8 +2453,12 @@ ul {
   color: var(--text);
 }
 
-.fd-target .fd-num { color: var(--accent); }
-.fd-best .fd-num { color: var(--green); }
+.fd-target .fd-num {
+  color: var(--accent);
+}
+.fd-best .fd-num {
+  color: var(--green);
+}
 
 .fd-price {
   font-size: 13px;
@@ -2438,7 +2466,9 @@ ul {
   color: var(--text);
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
 .fd-cell.fd-prices-visible .fd-price {
@@ -2456,7 +2486,9 @@ ul {
 .fd-cell.fd-scanning {
   border-color: var(--accent) !important;
   background: rgba(22, 104, 220, 0.12) !important;
-  box-shadow: 0 0 0 3px rgba(22, 104, 220, 0.22), var(--shadow) !important;
+  box-shadow:
+    0 0 0 3px rgba(22, 104, 220, 0.22),
+    var(--shadow) !important;
   transform: translateY(-2px) !important;
 }
 
@@ -2498,9 +2530,21 @@ ul {
 }
 
 @keyframes fd-found-pulse {
-  0% { box-shadow: 0 0 0 3px rgba(0,196,122,0.18), var(--shadow); }
-  50% { box-shadow: 0 0 0 8px rgba(0,196,122,0.08), var(--shadow-lg); }
-  100% { box-shadow: 0 0 0 3px rgba(0,196,122,0.18), var(--shadow); }
+  0% {
+    box-shadow:
+      0 0 0 3px rgba(0, 196, 122, 0.18),
+      var(--shadow);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(0, 196, 122, 0.08),
+      var(--shadow-lg);
+  }
+  100% {
+    box-shadow:
+      0 0 0 3px rgba(0, 196, 122, 0.18),
+      var(--shadow);
+  }
 }
 
 .fd-legend {
@@ -2526,9 +2570,18 @@ ul {
   border: 1.5px solid transparent;
 }
 
-.fd-legend-target span { background: rgba(22,104,220,0.1); border-color: var(--accent); }
-.fd-legend-offset span { background: rgba(22,104,220,0.08); border-color: rgba(22,104,220,0.3); }
-.fd-legend-best span { background: rgba(0,196,122,0.1); border-color: var(--green); }
+.fd-legend-target span {
+  background: rgba(22, 104, 220, 0.1);
+  border-color: var(--accent);
+}
+.fd-legend-offset span {
+  background: rgba(22, 104, 220, 0.08);
+  border-color: rgba(22, 104, 220, 0.3);
+}
+.fd-legend-best span {
+  background: rgba(0, 196, 122, 0.1);
+  border-color: var(--green);
+}
 
 /* ============================================
    MULTI-CURRENCY SECTION
@@ -2614,7 +2667,9 @@ ul {
   margin-bottom: 20px;
 }
 
-.cur-card-route svg { color: var(--accent); }
+.cur-card-route svg {
+  color: var(--accent);
+}
 
 .cur-card-date {
   font-size: 13px;
@@ -2676,7 +2731,9 @@ ul {
   transition: opacity 0.25s ease;
 }
 
-.cur-save-text.fading { opacity: 0; }
+.cur-save-text.fading {
+  opacity: 0;
+}
 
 .cur-rate-note {
   font-size: 12px;

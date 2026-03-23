@@ -734,5 +734,26 @@
     </footer>
 
     <script src="index.js"></script>
+    <script type="module">
+          import { WebHaptics, defaultPatterns } from 'https://cdn.jsdelivr.net/npm/web-haptics@0.0.6/+esm';
+
+        const haptics = new WebHaptics();
+        const trigger = () => { try { haptics.trigger(defaultPatterns.soft); } catch (_) {} };
+        document.querySelectorAll(
+            'button.faq-q, button.cur-btn, button#fdRescanBtn, a:not([href^="http"])'
+        ).forEach(el => el.addEventListener('click', trigger));
+
+        document.querySelectorAll('a[href^="http"]').forEach((el) => {
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                trigger();
+                 setTimeout(() => {
+                window.open(el.href, '_blank', 'noopener');
+            }, 100);
+            });
+           
+        });
+        
+    </script>
 </body>
 </html>
