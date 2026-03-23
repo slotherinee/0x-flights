@@ -4,7 +4,7 @@ import { clearState, getState, setState } from '../state/conversation'
 import { cancelKeyboard, currencyKeyboard, passengersKeyboard, flexibilityKeyboard } from '../keyboards'
 import { handleDeleteAsk, handleDeleteConfirm, handleEditAsk } from './commands'
 import { examples } from '../utils'
-import { apiGetUserLanguage, apiSetUserCurrency, apiSetUserLanguage } from '../api-client'
+import { apiGetUserLanguage, apiSetUserCurrency, apiSetUserLanguage, apiUpdateTracker } from '../api-client'
 
 export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.CallbackQuery) {
   const chatId = query.message?.chat.id
@@ -160,7 +160,6 @@ export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.C
 
     // Edit flow
     if (state.intent === 'edit' && state.editTrackerId) {
-      const { apiUpdateTracker } = await import('../api-client')
       try {
         await apiUpdateTracker(state.editTrackerId, { adults }, telegramId)
         await clearState(chatId)

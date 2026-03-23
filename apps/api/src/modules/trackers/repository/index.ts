@@ -9,5 +9,6 @@ export {
 export {
   createTrackerForUser,
   findTrackersByUserId,
+  updateTrackerForUser,
   softDeleteTrackerForUser,
 } from './tracker-repository'
