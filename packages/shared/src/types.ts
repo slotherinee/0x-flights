@@ -54,6 +54,17 @@ export interface Notification {
   createdAt: Date
 }
 
+export interface FlightTicket {
+  price: number
+  tags: string[]
+  airlines: string | null
+  isDirect: boolean
+  stops: number
+  duration: string | null
+  departureTime: string | null
+  arrivalTime: string | null
+}
+
 export interface NotificationJob {
   trackerId: number
   userId: number
@@ -70,6 +81,7 @@ export interface NotificationJob {
   threshold: number
   previousPrice?: number | null
   ticketUrl: string | null
+  tickets?: FlightTicket[]
 }
 
 export interface CreateTrackerDto {

@@ -1,3 +1,5 @@
+import type { FlightTicket } from '@0x-flights/shared'
+
 export interface FlightSearchParams {
   origin: string
   destination: string
@@ -11,6 +13,7 @@ export interface FlightSearchResult {
   lowestPrice: number
   currency: string
   source: string
+  tickets: FlightTicket[]
 }
 
 export interface FlightProvider {

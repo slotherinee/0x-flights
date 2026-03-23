@@ -1,4 +1,4 @@
-import type { NotificationJob, UserCurrency, UserLanguage } from './types'
+import type { FlightTicket, NotificationJob, UserCurrency, UserLanguage } from './types'
 
 export const SUPPORTED_CURRENCIES: UserCurrency[] = ['USD', 'EUR', 'RUB', 'GBP']
 
@@ -129,6 +129,29 @@ export function isSupportedCurrency(value: string | null | undefined): value is 
   return normalized === 'USD' || normalized === 'EUR' || normalized === 'RUB' || normalized === 'GBP'
 }
 
+const MAX_TICKETS = 5
+
+function cleanTag(tag: string): string {
+  return tag.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function renderTickets(tickets: FlightTicket[], currency: string, lang: UserLanguage): string {
+  const list = tickets.slice(0, MAX_TICKETS)
+  return list.map((t) => {
+    const price = Math.round(t.price)
+    const stopsLabel = t.isDirect
+      ? (lang === 'ru' ? 'прямой' : 'direct')
+      : lang === 'ru' ? `${t.stops} пересадка` : `${t.stops} stop${t.stops > 1 ? 's' : ''}`
+    const details: string[] = [stopsLabel]
+    if (t.duration) details.push(t.duration)
+    if (t.airlines) details.push(t.airlines)
+    if (t.departureTime && t.arrivalTime) details.push(`${t.departureTime}–${t.arrivalTime}`)
+    const tags = t.tags.map(cleanTag).filter(Boolean)
+    const tagsLine = tags.length ? `\n🏷 ${tags.join(' · ')}` : ''
+    return `*${price} ${currency}* — ${details.join(', ')}${tagsLine}`
+  }).join('\n\n')
+}
+
 function flexDateLabel(date: string, offset: number, lang: UserLanguage): string {
   const formatted = formatDate(date)
   if (offset === 0) return formatted
@@ -146,21 +169,24 @@ export function buildLocalizedNotificationMessage(
   const originLabel = cityLabel(job.origin, lang)
   const destLabel = cityLabel(job.destination, lang)
 
-  const bookLine = job.ticketUrl ? `\n🛒 [${lang === 'ru' ? 'Купить билет' : 'Book ticket'}](${job.ticketUrl})` : ''
+  const bookLine = job.ticketUrl ? `\n\n🛒 [${lang === 'ru' ? 'Купить билет' : 'Book ticket'}](${job.ticketUrl})` : ''
+  const ticketsBlock = job.tickets?.length
+    ? `\n\n${renderTickets(job.tickets, job.currency, lang)}`
+    : `\n*${Math.round(job.price)} ${job.currency}*`
 
   if (lang === 'ru') {
     const tripLabel = job.returnDate ? '🔄 Туда-обратно' : '✈️ В одну сторону'
     const diffLine =
       job.previousPrice != null && job.previousPrice !== job.price
-        ? `📉 Изменение: *${job.previousPrice > job.price ? '-' : '+'}${Math.abs(Math.round((job.previousPrice - job.price) * 100) / 100)} ${job.currency}* (было ${job.previousPrice})\n`
+        ? `\n📉 Было: *${Math.round(job.previousPrice)} ${job.currency}* → теперь от *${Math.round(job.price)} ${job.currency}*`
         : ''
     return (
       `🚨 *Снижение цены!*\n\n` +
       `✈️ *${originLabel} → ${destLabel}*\n` +
       `📅 ${dateLabel}  ${tripLabel}\n` +
-      `💰 Текущая цена: *${job.price} ${job.currency}*\n` +
-      diffLine +
       `🎯 Ваш порог: ${job.threshold} ${job.currency}` +
+      diffLine +
+      ticketsBlock +
       bookLine
     )
   }
@@ -168,15 +194,15 @@ export function buildLocalizedNotificationMessage(
   const tripLabel = job.returnDate ? '🔄 Round-trip' : '✈️ One-way'
   const diffLine =
     job.previousPrice != null && job.previousPrice !== job.price
-      ? `📉 Change: *${job.previousPrice > job.price ? '-' : '+'}${Math.abs(Math.round((job.previousPrice - job.price) * 100) / 100)} ${job.currency}* (was ${job.previousPrice})\n`
+      ? `\n📉 Was: *${Math.round(job.previousPrice)} ${job.currency}* → now from *${Math.round(job.price)} ${job.currency}*`
       : ''
   return (
     `🚨 *Price Alert!*\n\n` +
     `✈️ *${originLabel} → ${destLabel}*\n` +
     `📅 ${dateLabel}  ${tripLabel}\n` +
-    `💰 Current price: *${job.price} ${job.currency}*\n` +
-    diffLine +
     `🎯 Your threshold: ${job.threshold} ${job.currency}` +
+    diffLine +
+    ticketsBlock +
     bookLine
   )
 }

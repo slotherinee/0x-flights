@@ -1,4 +1,5 @@
 import { join } from 'path'
+import type { FlightTicket } from '@0x-flights/shared'
 import type { FlightProvider, FlightSearchParams, FlightSearchResult } from './types'
 
 const SCRIPT_PATH = join(import.meta.dir, '../../scraper/av.py')
@@ -7,9 +8,13 @@ interface ScraperFlight {
   price: number | null
   currency: string
   source: string
+  tags: string[]
   airlines: string | null
   is_direct: boolean
   stops: number
+  duration: string | null
+  departure: { time: string | null }
+  arrival: { time: string | null }
 }
 
 export class AvProvider implements FlightProvider {
@@ -54,12 +59,22 @@ export class AvProvider implements FlightProvider {
     const withPrice = flights.filter((f) => f.price !== null && f.price > 0)
     if (!withPrice.length) return null
 
-    const cheapest = withPrice[0]!
+    const tickets: FlightTicket[] = withPrice.map((f) => ({
+      price: f.price!,
+      tags: f.tags ?? [],
+      airlines: f.airlines ?? null,
+      isDirect: f.is_direct,
+      stops: f.stops,
+      duration: f.duration ?? null,
+      departureTime: f.departure?.time ?? null,
+      arrivalTime: f.arrival?.time ?? null,
+    }))
 
     return {
-      lowestPrice: cheapest.price!,
-      currency: cheapest.currency,
+      lowestPrice: tickets[0]!.price,
+      currency: withPrice[0]!.currency,
       source: 'av',
+      tickets,
     }
   }
 }

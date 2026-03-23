@@ -1,7 +1,7 @@
 import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
 import { getActiveTrackers, insertPricesBatch, getLastSentNotificationPrices } from '@0x-flights/db'
-import type { NotificationJob, Tracker } from '@0x-flights/shared'
+import type { FlightTicket, NotificationJob, Tracker } from '@0x-flights/shared'
 import { env } from '@0x-flights/config'
 import type { FlightProvider } from '../providers'
 import { buildSearchPlan } from './group-trackers'
@@ -66,7 +66,7 @@ async function saveMetrics(
 
 type PriceRecord = { trackerId: number; price: number; currency: string; source: string }
 
-type PendingNotification = { tracker: Tracker; telegramId: string; price: number; currency: string }
+type PendingNotification = { tracker: Tracker; telegramId: string; price: number; currency: string; tickets?: FlightTicket[] }
 
 type RunPriceCycleDeps = { provider: FlightProvider; redis: Redis; notifQueue: Queue<NotificationJob> }
 
@@ -87,6 +87,7 @@ function toNotificationJob(pending: PendingNotification, previousPrice: number |
     threshold: pending.tracker.priceThreshold,
     previousPrice,
     ticketUrl: buildTicketUrl(pending.tracker),
+    tickets: pending.tickets,
   }
 }
 
@@ -120,7 +121,7 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
   const prevPrices = await getLastSentNotificationPrices(trackers.map((t) => t.id))
 
   // Execute queries and process each tracker as soon as all its queries are ready
-  type SearchResult = { lowestPrice: number; source: string }
+  type SearchResult = { lowestPrice: number; source: string; tickets: FlightTicket[] }
   const queryResults = new Map<string, SearchResult | null>()
   const processedTrackers = new Set<number>()
   const priceRecords: PriceRecord[] = []
@@ -129,7 +130,7 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
   for (const [key, query] of queries) {
     try {
       const result = await provider.searchFlights({ ...query, currency: 'USD' })
-      queryResults.set(key, result ? { lowestPrice: result.lowestPrice, source: result.source } : null)
+      queryResults.set(key, result ? { lowestPrice: result.lowestPrice, source: result.source, tickets: result.tickets ?? [] } : null)
       if (result) console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} USD`)
       else console.log(`[PriceWorker] No result for ${key}`)
     } catch (err) {
@@ -163,8 +164,10 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
       if (converted <= tracker.priceThreshold) {
         const telegramId = userMap.get(tracker.userId)
         if (telegramId) {
+          const ratio = converted / best.lowestPrice
+          const convertedTickets = best.tickets.map((t) => ({ ...t, price: Math.round(t.price * ratio * 100) / 100 }))
           const job = toNotificationJob(
-            { tracker, telegramId, price: converted, currency: tracker.currency },
+            { tracker, telegramId, price: converted, currency: tracker.currency, tickets: convertedTickets },
             prevPrices.get(tracker.id) ?? null,
           )
           await notifQueue.add('notify', job)
