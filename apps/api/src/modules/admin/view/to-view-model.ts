@@ -54,6 +54,25 @@ export function toViewModel(
         : 'never',
       freshness: workerStatus.freshness,
       forcePending: workerStatus.forcePending,
+      lastCycle: workerStatus.lastCycle
+        ? {
+            cycleCount: String(workerStatus.lastCycle.cycleCount),
+            durationText: workerStatus.lastCycle.durationMs < 1000
+              ? `${workerStatus.lastCycle.durationMs}ms`
+              : `${(workerStatus.lastCycle.durationMs / 1000).toFixed(1)}s`,
+            trackers: workerStatus.lastCycle.trackers,
+            routes: workerStatus.lastCycle.routes,
+            prices: workerStatus.lastCycle.prices,
+            notifs: workerStatus.lastCycle.notifs,
+          }
+        : null,
+      notifWorker: {
+        lastRunText: workerStatus.notifWorker.lastRun
+          ? `${formatMoscowDateTime(workerStatus.notifWorker.lastRun)} (${formatRelativeAge(Date.now() - new Date(workerStatus.notifWorker.lastRun).getTime())})`
+          : 'never',
+        jobsCompleted: workerStatus.notifWorker.jobsCompleted,
+        jobsFailed: workerStatus.notifWorker.jobsFailed,
+      },
     },
     allUsers: usersPage.items.map((u) => ({
       id: u.id,

@@ -10,6 +10,19 @@ export type AdminPageViewModel = {
     lastRunText: string
     freshness: 'ok' | 'stale' | 'never'
     forcePending: boolean
+    lastCycle: {
+      cycleCount: string
+      durationText: string
+      trackers: number
+      routes: number
+      prices: number
+      notifs: number
+    } | null
+    notifWorker: {
+      lastRunText: string
+      jobsCompleted: number
+      jobsFailed: number
+    }
   }
   allUsers: Array<{
     id: number

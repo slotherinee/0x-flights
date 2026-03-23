@@ -36,15 +36,16 @@
       <div class="panel-head">
         <div>
           <h2>Worker status</h2>
-          <p class="panel-help">What is happening: checks if price worker is fresh and allows forcing next run.</p>
+          <p class="panel-help">Live metrics from price and notification workers — updated after each cycle.</p>
         </div>
       </div>
-      <div class="table-shell">
+
+      <div class="table-shell" style="margin-bottom:1.5rem">
         <table>
-          <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Force-run flag</th><th>Action</th></tr></thead>
+          <thead><tr><th>Worker</th><th>Last run</th><th>Freshness</th><th>Action</th></tr></thead>
           <tbody>
             <tr>
-              <td>worker-prices</td>
+              <td><b>worker-prices</b></td>
               <td>{{workerStatus.lastRunText}}</td>
               <td>
                 {{#if (eq workerStatus.freshness "ok")}}
@@ -58,25 +59,45 @@
                 {{/if}}
               </td>
               <td>
-                {{#if workerStatus.forcePending}}
-                  <span class="badge active">pending</span>
-                {{else}}
-                  <span class="dim">no</span>
-                {{/if}}
-              </td>
-              <td>
                 <form method="POST" action="/adminpage/workers/prices/run-now" style="display:inline">
-                  <button class="btn btn-blue">Run now</button>
+                  <button class="btn btn-blue">{{#if workerStatus.forcePending}}Pending…{{else}}Run now{{/if}}</button>
                 </form>
-                <button
-                  class="btn btn-ghost js-details"
-                  data-title="Worker details"
-                  data-details="Worker::worker-prices||Last run::{{workerStatus.lastRunText}}||Freshness::{{workerStatus.freshness}}||Force pending::{{#if workerStatus.forcePending}}yes{{else}}no{{/if}}||Action::Run now sets force-run flag in Redis"
-                >Details</button>
               </td>
+            </tr>
+            <tr>
+              <td><b>worker-notifications</b></td>
+              <td>{{workerStatus.notifWorker.lastRunText}}</td>
+              <td><span class="dim">—</span></td>
+              <td><span class="dim">—</span></td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metrics-group">
+          <div class="metrics-group-title">Price worker — last cycle</div>
+          {{#if workerStatus.lastCycle}}
+            <div class="metrics-row">
+              <div class="metric-card"><div class="metric-label">Total cycles</div><div class="metric-val">{{workerStatus.lastCycle.cycleCount}}</div></div>
+              <div class="metric-card"><div class="metric-label">Duration</div><div class="metric-val">{{workerStatus.lastCycle.durationText}}</div></div>
+              <div class="metric-card"><div class="metric-label">Trackers</div><div class="metric-val">{{workerStatus.lastCycle.trackers}}</div></div>
+              <div class="metric-card"><div class="metric-label">Routes</div><div class="metric-val">{{workerStatus.lastCycle.routes}}</div></div>
+              <div class="metric-card"><div class="metric-label">Prices saved</div><div class="metric-val">{{workerStatus.lastCycle.prices}}</div></div>
+              <div class="metric-card"><div class="metric-label">Notifs sent</div><div class="metric-val">{{workerStatus.lastCycle.notifs}}</div></div>
+            </div>
+          {{else}}
+            <p class="dim" style="padding:0.75rem 0">No cycle data yet — worker hasn't run since deploy.</p>
+          {{/if}}
+        </div>
+
+        <div class="metrics-group">
+          <div class="metrics-group-title">Notification worker — all time</div>
+          <div class="metrics-row">
+            <div class="metric-card good"><div class="metric-label">Jobs completed</div><div class="metric-val">{{workerStatus.notifWorker.jobsCompleted}}</div></div>
+            <div class="metric-card {{#if workerStatus.notifWorker.jobsFailed}}bad{{/if}}"><div class="metric-label">Jobs failed</div><div class="metric-val">{{workerStatus.notifWorker.jobsFailed}}</div></div>
+          </div>
+        </div>
       </div>
     </section>
 

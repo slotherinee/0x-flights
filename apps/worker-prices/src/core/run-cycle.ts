@@ -21,9 +21,26 @@ type RunPriceCycleDeps = {
 }
 
 const LAST_RUN_KEY = 'worker-prices:last-run'
+const CYCLE_COUNT_KEY = 'worker-prices:cycle-count'
+const LAST_CYCLE_KEY = 'worker-prices:last-cycle'
 
 async function markLastRun(redis: Redis) {
   await redis.set(LAST_RUN_KEY, new Date().toISOString())
+}
+
+async function saveMetrics(
+  redis: Redis,
+  durationMs: number,
+  trackerCount: number,
+  routeCount: number,
+  priceCount: number,
+  notifCount: number,
+) {
+  const cycleCount = await redis.incr(CYCLE_COUNT_KEY)
+  await redis.set(
+    LAST_CYCLE_KEY,
+    JSON.stringify({ durationMs, trackers: trackerCount, routes: routeCount, prices: priceCount, notifs: notifCount, cycleCount }),
+  )
 }
 
 type PendingNotification = {
@@ -57,11 +74,13 @@ export async function runPriceCycle({
   redis,
   notifQueue,
 }: RunPriceCycleDeps): Promise<void> {
+  const cycleStart = Date.now()
   console.log(`[PriceWorker] Cycle start - provider: ${provider.name}`)
 
   const trackers = await getActiveTrackers()
   if (!trackers.length) {
     console.log('[PriceWorker] No active trackers, skipping.')
+    await saveMetrics(redis, Date.now() - cycleStart, 0, 0, 0, 0)
     await markLastRun(redis)
     return
   }
@@ -72,6 +91,7 @@ export async function runPriceCycle({
   const usdRates = await getUsdRates(redis)
   if (!usdRates) {
     console.error('[PriceWorker] FX rates unavailable, cycle skipped.')
+    await saveMetrics(redis, Date.now() - cycleStart, trackers.length, 0, 0, 0)
     await markLastRun(redis)
     return
   }
@@ -147,6 +167,7 @@ export async function runPriceCycle({
     console.log(`[PriceWorker] Enqueued ${notificationJobs.length} notifications`)
   }
 
+  await saveMetrics(redis, Date.now() - cycleStart, trackers.length, groups.size, priceRecords.length, notificationJobs.length)
   await markLastRun(redis)
   console.log('[PriceWorker] Cycle complete.')
 }

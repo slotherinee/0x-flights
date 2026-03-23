@@ -363,6 +363,65 @@ a:hover {
   font-size: 0.86rem;
 }
 
+.metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metrics-group {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  padding: 14px 16px;
+}
+
+.metrics-group-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.metrics-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.metric-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111820;
+  padding: 10px 16px;
+  min-width: 100px;
+}
+
+.metric-card.good {
+  border-color: #1f4533;
+  background: #101e18;
+}
+
+.metric-card.bad {
+  border-color: #5a2828;
+  background: #1e1010;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.metric-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
 @media (max-width: 1100px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);

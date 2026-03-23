@@ -1,9 +1,18 @@
 import { env } from '@0x-flights/config'
 import { redis } from '../redis'
-import type { AdminWorkerStatus } from '../types'
+import type { AdminWorkerStatus, PriceCycleMetrics } from '../types'
 
 export async function getPriceWorkerStatus(): Promise<AdminWorkerStatus> {
-  const [lastRun, forceFlag] = await redis.mget('worker-prices:last-run', 'worker-prices:force-run')
+  const [lastRun, forceFlag, lastCycleRaw, notifLastRun, notifCompleted, notifFailed] =
+    await redis.mget(
+      'worker-prices:last-run',
+      'worker-prices:force-run',
+      'worker-prices:last-cycle',
+      'worker-notifications:last-run',
+      'worker-notifications:jobs-completed',
+      'worker-notifications:jobs-failed',
+    )
+
   let ageMs: number | null = null
   let freshness: 'ok' | 'stale' | 'never' = 'never'
 
@@ -16,10 +25,23 @@ export async function getPriceWorkerStatus(): Promise<AdminWorkerStatus> {
     }
   }
 
+  let lastCycle: PriceCycleMetrics | null = null
+  if (lastCycleRaw) {
+    try {
+      lastCycle = JSON.parse(lastCycleRaw) as PriceCycleMetrics
+    } catch {}
+  }
+
   return {
     lastRun: lastRun ?? null,
     ageMs,
     freshness,
     forcePending: forceFlag != null,
+    lastCycle,
+    notifWorker: {
+      lastRun: notifLastRun ?? null,
+      jobsCompleted: parseInt(notifCompleted ?? '0') || 0,
+      jobsFailed: parseInt(notifFailed ?? '0') || 0,
+    },
   }
 }

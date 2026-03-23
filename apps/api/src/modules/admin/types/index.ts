@@ -1,5 +1,5 @@
 export type { AdminStats } from './admin-stats'
-export type { AdminWorkerStatus } from './admin-worker-status'
+export type { AdminWorkerStatus, PriceCycleMetrics } from './admin-worker-status'
 export type { AdminUserRow } from './admin-user-row'
 export type { AdminTrackerRow } from './admin-tracker-row'
 export type { AdminPriceRow } from './admin-price-row'
