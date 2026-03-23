@@ -15,6 +15,8 @@ const toTracker = (r: Row): Tracker => ({
   priceThreshold: Number(r.priceThreshold),
   currency: r.currency.trim(),
   adults: r.adults,
+  departureOffset: r.departureOffset ?? 0,
+  returnOffset: r.returnOffset ?? 0,
   isActive: r.isActive,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
@@ -35,6 +37,8 @@ export async function createTracker(
       priceThreshold: String(dto.priceThreshold),
       currency: (dto.currency ?? 'USD').toUpperCase(),
       adults: dto.adults ?? 1,
+      departureOffset: dto.departureOffset ?? 0,
+      returnOffset: dto.returnOffset ?? 0,
     })
     .returning()
   return toTracker(row!)

@@ -11,7 +11,9 @@ export type TrackStep =
   | 'AWAITING_DESTINATION_CITY'
   | 'AWAITING_TRIP_TYPE'
   | 'AWAITING_DATE'
+  | 'AWAITING_DEP_FLEXIBILITY'
   | 'AWAITING_RETURN_DATE'
+  | 'AWAITING_RET_FLEXIBILITY'
   | 'AWAITING_PASSENGERS'
   | 'AWAITING_THRESHOLD'
 
@@ -27,6 +29,8 @@ export interface ConversationState {
   tripType?: 'oneway' | 'roundtrip'
   departureDate?: string
   returnDate?: string
+  departureOffset?: number
+  returnOffset?: number
   adults?: number
 }
 

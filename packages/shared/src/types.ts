@@ -22,6 +22,8 @@ export interface Tracker {
   priceThreshold: number
   currency: string
   adults: number
+  departureOffset: number
+  returnOffset: number
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -61,6 +63,8 @@ export interface NotificationJob {
   departureDate: string
   returnDate: string | null
   adults: number
+  departureOffset: number
+  returnOffset: number
   price: number
   currency: string
   threshold: number
@@ -77,4 +81,6 @@ export interface CreateTrackerDto {
   priceThreshold: number
   currency?: string
   adults?: number
+  departureOffset?: number
+  returnOffset?: number
 }

@@ -54,6 +54,17 @@ export const passengersKeyboard = (lang: 'en' | 'ru'): TelegramBot.InlineKeyboar
   ],
 })
 
+export const flexibilityKeyboard = (lang: 'en' | 'ru'): TelegramBot.InlineKeyboardMarkup => ({
+  inline_keyboard: [
+    [
+      { text: lang === 'ru' ? '📅 Точная дата' : '📅 Exact date', callback_data: 'flex:0' },
+      { text: '±3', callback_data: 'flex:3' },
+      { text: '±7', callback_data: 'flex:7' },
+    ],
+    [{ text: '❌ Cancel', callback_data: 'cancel' }],
+  ],
+})
+
 export const deleteConfirmKeyboard = (id: number): TelegramBot.InlineKeyboardMarkup => ({
   inline_keyboard: [
     [

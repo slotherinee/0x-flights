@@ -1,6 +1,6 @@
 import type TelegramBot from 'node-telegram-bot-api'
 import { getState, setState, clearState } from '../state/conversation'
-import { cancelKeyboard, tripTypeKeyboard, passengersKeyboard } from '../keyboards'
+import { cancelKeyboard, tripTypeKeyboard, passengersKeyboard, flexibilityKeyboard } from '../keyboards'
 import { apiCreateTracker } from '../api-client'
 import { examples, formatCityLabel, resolveCityToIata, parseHumanDate } from '../utils'
 
@@ -131,26 +131,24 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         )
         return
       }
+      await setState(chatId, { ...state, step: 'AWAITING_DEP_FLEXIBILITY', departureDate: parsed })
+      await bot.sendMessage(
+        chatId,
+        lang === 'ru'
+          ? `✅ Дата вылета: *${parsed}*\n\n📅 Проверять точную дату или гибкий диапазон?`
+          : `✅ Departure: *${parsed}*\n\n📅 Exact date or flexible range?`,
+        { parse_mode: 'Markdown', reply_markup: flexibilityKeyboard(lang) },
+      )
+      break
+    }
 
-      if (state.tripType === 'roundtrip') {
-        await setState(chatId, { ...state, step: 'AWAITING_RETURN_DATE', departureDate: parsed })
-        await bot.sendMessage(
-          chatId,
-          lang === 'ru'
-            ? `✅ Дата вылета: *${parsed}*\n\n📅 Теперь введите *дату обратного рейса*:\n_Например: 29 марта, 29.03.2026_`
-            : `✅ Departure: *${parsed}*\n\n📅 Now enter the *return date*:\n_E.g.: 29 march, 29.03.2026_`,
-          { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
-        )
-      } else {
-        await setState(chatId, { ...state, step: 'AWAITING_PASSENGERS', departureDate: parsed })
-        await bot.sendMessage(
-          chatId,
-          lang === 'ru'
-            ? `✅ Дата вылета: *${parsed}*\n\n👤 Сколько пассажиров?`
-            : `✅ Departure: *${parsed}*\n\n👤 How many passengers?`,
-          { parse_mode: 'Markdown', reply_markup: passengersKeyboard(lang) },
-        )
-      }
+    case 'AWAITING_DEP_FLEXIBILITY':
+    case 'AWAITING_RET_FLEXIBILITY': {
+      await bot.sendMessage(
+        chatId,
+        lang === 'ru' ? 'Выберите вариант кнопками выше.' : 'Choose an option with the buttons above.',
+        { reply_markup: flexibilityKeyboard(lang) },
+      )
       break
     }
 
@@ -176,13 +174,13 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         )
         return
       }
-      await setState(chatId, { ...state, step: 'AWAITING_PASSENGERS', returnDate: parsed })
+      await setState(chatId, { ...state, step: 'AWAITING_RET_FLEXIBILITY', returnDate: parsed })
       await bot.sendMessage(
         chatId,
         lang === 'ru'
-          ? `✅ Обратный рейс: *${parsed}*\n\n👤 Сколько пассажиров?`
-          : `✅ Return: *${parsed}*\n\n👤 How many passengers?`,
-        { parse_mode: 'Markdown', reply_markup: passengersKeyboard(lang) },
+          ? `✅ Обратный рейс: *${parsed}*\n\n📅 Проверять точную дату или гибкий диапазон?`
+          : `✅ Return: *${parsed}*\n\n📅 Exact date or flexible range?`,
+        { parse_mode: 'Markdown', reply_markup: flexibilityKeyboard(lang) },
       )
       break
     }
@@ -216,13 +214,17 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
           priceThreshold: price,
           currency: state.currency ?? 'USD',
           adults: state.adults ?? 1,
+          departureOffset: state.departureOffset ?? 0,
+          returnOffset: state.returnOffset ?? 0,
         })
         await clearState(chatId)
 
         const isRoundTrip = !!tracker.returnDate
-        const dateLabel = isRoundTrip
-          ? (lang === 'ru' ? `${tracker.departureDate} → ${tracker.returnDate}` : `${tracker.departureDate} → ${tracker.returnDate}`)
-          : tracker.departureDate
+        const fmtDep = tracker.departureOffset > 0 ? `~${tracker.departureDate} ±${tracker.departureOffset}` : tracker.departureDate
+        const fmtRet = tracker.returnDate
+          ? (tracker.returnOffset > 0 ? `~${tracker.returnDate} ±${tracker.returnOffset}` : tracker.returnDate)
+          : null
+        const dateLabel = fmtRet ? `${fmtDep} → ${fmtRet}` : fmtDep
         const tripLabel = isRoundTrip
           ? (lang === 'ru' ? '🔄 Туда-обратно' : '🔄 Round-trip')
           : (lang === 'ru' ? '✈️ В одну сторону' : '✈️ One-way')

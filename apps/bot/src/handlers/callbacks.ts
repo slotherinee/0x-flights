@@ -1,7 +1,7 @@
 import type TelegramBot from 'node-telegram-bot-api'
 import { isSupportedCurrency } from '@0x-flights/shared'
 import { clearState, getState, setState } from '../state/conversation'
-import { cancelKeyboard, currencyKeyboard } from '../keyboards'
+import { cancelKeyboard, currencyKeyboard, passengersKeyboard } from '../keyboards'
 import { handleDeleteAsk, handleDeleteConfirm } from './commands'
 import { examples } from '../utils'
 import { apiGetUserLanguage, apiSetUserCurrency, apiSetUserLanguage } from '../api-client'
@@ -105,17 +105,64 @@ export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.C
     return
   }
 
+  // flexibility selection (departure or return)
+  if (data.startsWith('flex:')) {
+    const state = await getState(chatId)
+    if (!state || (state.step !== 'AWAITING_DEP_FLEXIBILITY' && state.step !== 'AWAITING_RET_FLEXIBILITY')) return
+    const lang = state.lang ?? 'en'
+    const offset = parseInt(data.split(':')[1] ?? '0', 10)
+    const validOffset = [0, 3, 7].includes(offset) ? offset : 0
+
+    if (state.step === 'AWAITING_DEP_FLEXIBILITY') {
+      const label = validOffset === 0
+        ? (lang === 'ru' ? '📅 Точная дата' : '📅 Exact date')
+        : `±${validOffset} ${lang === 'ru' ? 'дн.' : 'd.'}`
+
+      if (state.tripType === 'roundtrip') {
+        await setState(chatId, { ...state, step: 'AWAITING_RETURN_DATE', departureOffset: validOffset })
+        await bot.editMessageText(
+          lang === 'ru'
+            ? `${label}\n\n📅 Введите *дату обратного рейса*:\n_Например: 29 марта, 29.03.2026_`
+            : `${label}\n\n📅 Enter *return date*:\n_E.g.: 29 march, 29.03.2026_`,
+          { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: cancelKeyboard },
+        )
+      } else {
+        await setState(chatId, { ...state, step: 'AWAITING_PASSENGERS', departureOffset: validOffset })
+        await bot.editMessageText(
+          lang === 'ru'
+            ? `${label}\n\n👤 Сколько пассажиров?`
+            : `${label}\n\n👤 How many passengers?`,
+          { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: passengersKeyboard(lang) },
+        )
+      }
+    } else {
+      // AWAITING_RET_FLEXIBILITY
+      const label = validOffset === 0
+        ? (lang === 'ru' ? '📅 Точная дата' : '📅 Exact date')
+        : `±${validOffset} ${lang === 'ru' ? 'дн.' : 'd.'}`
+      await setState(chatId, { ...state, step: 'AWAITING_PASSENGERS', returnOffset: validOffset })
+      await bot.editMessageText(
+        lang === 'ru'
+          ? `${label}\n\n👤 Сколько пассажиров?`
+          : `${label}\n\n👤 How many passengers?`,
+        { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: passengersKeyboard(lang) },
+      )
+    }
+    return
+  }
+
   // passengers selection
   if (data.startsWith('pax:')) {
     const state = await getState(chatId)
     if (!state || state.step !== 'AWAITING_PASSENGERS') return
     const lang = state.lang ?? 'en'
     const adults = parseInt(data.split(':')[1] ?? '1', 10)
+    const currency = state.currency ?? 'USD'
     await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', adults })
     await bot.editMessageText(
       lang === 'ru'
-        ? `👤 Пассажиров: *${adults}*\n\n💰 Введите *максимальную цену* (например, \`3500\`):`
-        : `👤 Passengers: *${adults}*\n\n💰 Enter *max price* (e.g. \`350\`):`,
+        ? `👤 Пассажиров: *${adults}*\n\n💰 Введите *максимальную цену в ${currency}* (например, \`3500\`):`
+        : `👤 Passengers: *${adults}*\n\n💰 Enter *max price in ${currency}* (e.g. \`350\`):`,
       { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: cancelKeyboard },
     )
     return

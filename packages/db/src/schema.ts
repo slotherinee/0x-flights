@@ -38,6 +38,8 @@ export const trackers = pgTable(
     priceThreshold: numeric('price_threshold', { precision: 10, scale: 2 }).notNull(),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
     adults: smallint('adults').notNull().default(1),
+    departureOffset: smallint('departure_offset').notNull().default(0),
+    returnOffset: smallint('return_offset').notNull().default(0),
     isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

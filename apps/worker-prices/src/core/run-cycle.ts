@@ -4,6 +4,11 @@ import { getActiveTrackers, insertPricesBatch, getLastSentNotificationPrices } f
 import type { NotificationJob, Tracker } from '@0x-flights/shared'
 import { env } from '@0x-flights/config'
 import type { FlightProvider } from '../providers'
+import { buildSearchPlan } from './group-trackers'
+import { loadUserTelegramMap } from './load-user-map'
+import { convertUsdToCurrency, getUsdRates } from './fx-rates'
+
+// ─── URL builder ─────────────────────────────────────────────────────────────
 
 function dateToDDMM(date: string): string {
   const parts = date.split('-')
@@ -14,29 +19,25 @@ function buildTicketUrl(tracker: Tracker): string | null {
   const base = env.PROVIDER_SEARCH_BASE_URL
   if (!base) return null
   const dep = dateToDDMM(tracker.departureDate)
-  const adults = tracker.adults ?? 1
+  const adults = tracker.adults
+
+  if (tracker.departureOffset > 0 || (tracker.returnDate && tracker.returnOffset > 0)) {
+    // Flexible URL: /?params=...&departure_offset=N&return_offset=M
+    const origin = base.replace(/\/search\/?$/, '')
+    const params = tracker.returnDate
+      ? `${tracker.origin}${dep}${tracker.destination}${dateToDDMM(tracker.returnDate)}${adults}`
+      : `${tracker.origin}${dep}${tracker.destination}${adults}`
+    const retOffset = tracker.returnDate ? tracker.returnOffset : 0
+    return `${origin}/?params=${params}&departure_offset=${tracker.departureOffset}&return_offset=${retOffset}`
+  }
+
   if (tracker.returnDate) {
-    const ret = dateToDDMM(tracker.returnDate)
-    return `${base}/${tracker.origin}${dep}${tracker.destination}${ret}${adults}`
+    return `${base}/${tracker.origin}${dep}${tracker.destination}${dateToDDMM(tracker.returnDate)}${adults}`
   }
   return `${base}/${tracker.origin}${dep}${tracker.destination}${adults}`
 }
-import { groupTrackersByRoute } from './group-trackers'
-import { loadUserTelegramMap } from './load-user-map'
-import { convertUsdToCurrency, getUsdRates } from './fx-rates'
 
-type PriceRecord = {
-  trackerId: number
-  price: number
-  currency: string
-  source: string
-}
-
-type RunPriceCycleDeps = {
-  provider: FlightProvider
-  redis: Redis
-  notifQueue: Queue<NotificationJob>
-}
+// ─── Redis metrics ────────────────────────────────────────────────────────────
 
 const LAST_RUN_KEY = 'worker-prices:last-run'
 const CYCLE_COUNT_KEY = 'worker-prices:cycle-count'
@@ -50,28 +51,26 @@ async function saveMetrics(
   redis: Redis,
   durationMs: number,
   trackerCount: number,
-  routeCount: number,
+  queryCount: number,
   priceCount: number,
   notifCount: number,
 ) {
   const cycleCount = await redis.incr(CYCLE_COUNT_KEY)
   await redis.set(
     LAST_CYCLE_KEY,
-    JSON.stringify({ durationMs, trackers: trackerCount, routes: routeCount, prices: priceCount, notifs: notifCount, cycleCount }),
+    JSON.stringify({ durationMs, trackers: trackerCount, routes: queryCount, prices: priceCount, notifs: notifCount, cycleCount }),
   )
 }
 
-type PendingNotification = {
-  tracker: Tracker
-  telegramId: string
-  price: number
-  currency: string
-}
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-function toNotificationJob(
-  pending: PendingNotification,
-  previousPrice: number | null,
-): NotificationJob {
+type PriceRecord = { trackerId: number; price: number; currency: string; source: string }
+
+type PendingNotification = { tracker: Tracker; telegramId: string; price: number; currency: string }
+
+type RunPriceCycleDeps = { provider: FlightProvider; redis: Redis; notifQueue: Queue<NotificationJob> }
+
+function toNotificationJob(pending: PendingNotification, previousPrice: number | null): NotificationJob {
   return {
     trackerId: pending.tracker.id,
     userId: pending.tracker.userId,
@@ -81,6 +80,8 @@ function toNotificationJob(
     departureDate: pending.tracker.departureDate,
     returnDate: pending.tracker.returnDate,
     adults: pending.tracker.adults,
+    departureOffset: pending.tracker.departureOffset,
+    returnOffset: pending.tracker.returnOffset,
     price: pending.price,
     currency: pending.currency,
     threshold: pending.tracker.priceThreshold,
@@ -89,11 +90,9 @@ function toNotificationJob(
   }
 }
 
-export async function runPriceCycle({
-  provider,
-  redis,
-  notifQueue,
-}: RunPriceCycleDeps): Promise<void> {
+// ─── Main cycle ───────────────────────────────────────────────────────────────
+
+export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCycleDeps): Promise<void> {
   const cycleStart = Date.now()
   console.log(`[PriceWorker] Cycle start - provider: ${provider.name}`)
 
@@ -105,8 +104,8 @@ export async function runPriceCycle({
     return
   }
 
-  const groups = groupTrackersByRoute(trackers)
-  console.log(`[PriceWorker] ${trackers.length} trackers -> ${groups.size} unique routes`)
+  const { queries, trackerQueryKeys } = buildSearchPlan(trackers)
+  console.log(`[PriceWorker] ${trackers.length} trackers -> ${queries.size} unique searches`)
 
   const usdRates = await getUsdRates(redis)
   if (!usdRates) {
@@ -116,78 +115,72 @@ export async function runPriceCycle({
     return
   }
 
+  // Preload data needed for per-tracker processing
   const userMap = await loadUserTelegramMap()
+  const prevPrices = await getLastSentNotificationPrices(trackers.map((t) => t.id))
+
+  // Execute queries and process each tracker as soon as all its queries are ready
+  type SearchResult = { lowestPrice: number; source: string }
+  const queryResults = new Map<string, SearchResult | null>()
+  const processedTrackers = new Set<number>()
   const priceRecords: PriceRecord[] = []
-  const pendingNotifications: PendingNotification[] = []
+  let notifCount = 0
 
-  for (const [key, group] of groups) {
-    const sample = group[0]
-    if (!sample) continue
-
-    let result = null
+  for (const [key, query] of queries) {
     try {
-      result = await provider.searchFlights({
-        origin: sample.origin,
-        destination: sample.destination,
-        departureDate: sample.departureDate,
-        returnDate: sample.returnDate,
-        adults: sample.adults,
-        currency: 'USD',
-      })
+      const result = await provider.searchFlights({ ...query, currency: 'USD' })
+      queryResults.set(key, result ? { lowestPrice: result.lowestPrice, source: result.source } : null)
+      if (result) console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} USD`)
+      else console.log(`[PriceWorker] No result for ${key}`)
     } catch (err) {
       console.error(`[PriceWorker] Search error for ${key}:`, err)
-      continue
+      queryResults.set(key, null)
     }
 
-    if (!result) {
-      console.log(`[PriceWorker] No result for ${key}`)
-      continue
-    }
+    // Process any tracker whose queries are all complete
+    for (const tracker of trackers) {
+      if (processedTrackers.has(tracker.id)) continue
+      const keys = trackerQueryKeys.get(tracker.id) ?? []
+      if (!keys.every((k) => queryResults.has(k))) continue
 
-    console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} ${result.currency}`)
+      processedTrackers.add(tracker.id)
 
-    for (const tracker of group) {
-      const converted = convertUsdToCurrency(result.lowestPrice, tracker.currency, usdRates)
+      let best: SearchResult | null = null
+      for (const k of keys) {
+        const r = queryResults.get(k)
+        if (r && (best === null || r.lowestPrice < best.lowestPrice)) best = r
+      }
+      if (!best) continue
+
+      const converted = convertUsdToCurrency(best.lowestPrice, tracker.currency, usdRates)
       if (converted === null) {
-        console.error(
-          `[PriceWorker] Missing FX rate for ${tracker.currency}; tracker ${tracker.id} skipped`,
-        )
+        console.error(`[PriceWorker] Missing FX rate for ${tracker.currency}; tracker ${tracker.id} skipped`)
         continue
       }
 
-      priceRecords.push({
-        trackerId: tracker.id,
-        price: converted,
-        currency: tracker.currency,
-        source: result.source,
-      })
+      priceRecords.push({ trackerId: tracker.id, price: converted, currency: tracker.currency, source: best.source })
 
       if (converted <= tracker.priceThreshold) {
         const telegramId = userMap.get(tracker.userId)
-        if (!telegramId) continue
-        pendingNotifications.push({ tracker, telegramId, price: converted, currency: tracker.currency })
+        if (telegramId) {
+          const job = toNotificationJob(
+            { tracker, telegramId, price: converted, currency: tracker.currency },
+            prevPrices.get(tracker.id) ?? null,
+          )
+          await notifQueue.add('notify', job)
+          notifCount++
+          console.log(`[PriceWorker] Enqueued notification for tracker ${tracker.id}`)
+        }
       }
     }
   }
-
-  const prevPrices = await getLastSentNotificationPrices(
-    pendingNotifications.map((n) => n.tracker.id),
-  )
-  const notificationJobs: NotificationJob[] = pendingNotifications.map((pending) =>
-    toNotificationJob(pending, prevPrices.get(pending.tracker.id) ?? null),
-  )
 
   if (priceRecords.length) {
     await insertPricesBatch(priceRecords)
     console.log(`[PriceWorker] Saved ${priceRecords.length} price records`)
   }
 
-  if (notificationJobs.length) {
-    await notifQueue.addBulk(notificationJobs.map((data) => ({ name: 'notify', data })))
-    console.log(`[PriceWorker] Enqueued ${notificationJobs.length} notifications`)
-  }
-
-  await saveMetrics(redis, Date.now() - cycleStart, trackers.length, groups.size, priceRecords.length, notificationJobs.length)
+  await saveMetrics(redis, Date.now() - cycleStart, trackers.length, queries.size, priceRecords.length, notifCount)
   await markLastRun(redis)
   console.log('[PriceWorker] Cycle complete.')
 }

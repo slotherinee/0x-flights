@@ -25,6 +25,8 @@ export const createTrackerSchema = z.object({
   priceThreshold: z.number().positive(),
   currency: z.string().length(3).default('USD'),
   adults: z.number().int().min(1).max(9).default(1),
+  departureOffset: z.number().int().refine((v) => [0, 3, 7].includes(v)).default(0),
+  returnOffset: z.number().int().refine((v) => [0, 3, 7].includes(v)).default(0),
 })
 
 export type CreateTrackerInput = z.infer<typeof createTrackerSchema>

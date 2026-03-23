@@ -25,7 +25,7 @@ export function createJobProcessor(bot: TelegramBot) {
       message,
     })
 
-    await bot.sendMessage(data.telegramId, message, { parse_mode: 'Markdown' })
+    await bot.sendMessage(data.telegramId, message, { parse_mode: 'Markdown', disable_web_page_preview: true })
     await markNotificationsSent([notification.id])
 
     console.log(

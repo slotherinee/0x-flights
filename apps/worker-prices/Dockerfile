@@ -26,6 +26,6 @@ COPY packages/shared/src ./packages/shared/src
 COPY packages/db/src ./packages/db/src
 COPY packages/db/migrations ./packages/db/migrations
 COPY apps/worker-prices/src ./apps/worker-prices/src
-COPY apps/worker-prices/scraper/flights.py ./apps/worker-prices/scraper/flights.py
+COPY apps/worker-prices/scraper/av.py ./apps/worker-prices/scraper/av.py
 
 CMD ["bun", "run", "apps/worker-prices/src/index.ts"]

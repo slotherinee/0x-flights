@@ -29,6 +29,20 @@
       "when": 1774029300000,
       "tag": "0003_users_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774254359839,
+      "tag": "0004_powerful_romulus",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1742725200000,
+      "tag": "0005_add_return_date",
+      "breakpoints": true
     }
   ]
 }
