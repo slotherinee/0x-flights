@@ -2,11 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>0x-flights — Умный мониторинг цен на авиабилеты</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap"></noscript>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,6 +32,8 @@
             </a>
         </div>
     </nav>
+    
+    <main>
 
     <!-- HERO -->
     <section class="hero">
@@ -711,6 +715,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- FOOTER -->
     <footer class="footer">
@@ -733,7 +738,7 @@
         </div>
     </footer>
 
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
     <script type="module">
           import { WebHaptics, defaultPatterns } from 'https://cdn.jsdelivr.net/npm/web-haptics@0.0.6/+esm';
 
