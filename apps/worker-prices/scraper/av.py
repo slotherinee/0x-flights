@@ -45,13 +45,29 @@ def date_to_ddmm(date_str: str) -> str:
     return d + m
 
 
-def build_url(origin: str, destination: str, dep_date: str, ret_date: str | None, adults: int, currency: str) -> str:
+def build_url(
+    origin: str,
+    destination: str,
+    dep_date: str,
+    ret_date: str | None,
+    adults: int,
+    currency: str,
+    dep_offset: int = 0,
+    ret_offset: int = 0,
+) -> str:
     dep = date_to_ddmm(dep_date)
     base = PROVIDER_BASE_URL.rstrip('/')
+    cur = currency.lower()
+
+    if dep_offset > 0 or (ret_date and ret_offset > 0):
+        search_base = base.replace('/search', '').rstrip('/')
+        params = f"{origin}{dep}{destination}{date_to_ddmm(ret_date)}{adults}" if ret_date else f"{origin}{dep}{destination}{adults}"
+        return f"{search_base}/?params={params}&departure_offset={dep_offset}&return_offset={ret_offset}&currency={cur}"
+
     if ret_date:
         ret = date_to_ddmm(ret_date)
-        return f"{base}/{origin}{dep}{destination}{ret}{adults}?currency={currency.lower()}"
-    return f"{base}/{origin}{dep}{destination}{adults}?currency={currency.lower()}"
+        return f"{base}/{origin}{dep}{destination}{ret}{adults}?currency={cur}"
+    return f"{base}/{origin}{dep}{destination}{adults}?currency={cur}"
 
 
 def parse_price(raw: str) -> float | None:
@@ -78,6 +94,163 @@ def extract_tickets_from_html(html: str, currency: str, dep_date: str) -> list[d
     results = []
     for block in blocks:
         ticket = _parse_ticket_block(block, currency, dep_date)
+        if ticket and ticket['price']:
+            results.append(ticket)
+    results.sort(key=lambda f: f['price'] if f['price'] is not None else float('inf'))
+    return results
+
+
+# ─── Flexible-date page parser ────────────────────────────────────────────────
+
+def _split_flex_ticket_blocks(html: str) -> list[str]:
+    blocks = []
+    pos = 0
+    while True:
+        marker = html.find('data-test-id="flexible_ai-prices-ticket"', pos)
+        if marker == -1:
+            break
+        div_start = html.rfind('<div', 0, marker)
+        if div_start == -1:
+            pos = marker + 1
+            continue
+        depth = 0
+        i = div_start
+        end = -1
+        while i < len(html):
+            if html[i:i + 4] == '<div':
+                depth += 1
+            elif html[i:i + 6] == '</div>':
+                depth -= 1
+                if depth == 0:
+                    end = i + 6
+                    break
+            i += 1
+        if end == -1:
+            pos = marker + 1
+            continue
+        blocks.append(html[div_start:end])
+        pos = end
+    return blocks
+
+
+def _parse_flex_dates_from_href(href: str, dep_date: str) -> tuple[str | None, str | None]:
+    """Parse departure and return ISO dates from a flex ticket link href.
+
+    The path encodes dates as /search/{ORIG}{DDMM}{DEST}{DDMM}{ADULTS}.
+    Year is inferred from search_date param (DDMMYYYY) or dep_date fallback.
+    """
+    base_year = int(dep_date[:4])
+    # search_date=DDMMYYYY, e.g. search_date=23032026 → year=2026
+    sd_m = re.search(r'search_date=\d{4}(\d{4})', href)
+    if sd_m:
+        base_year = int(sd_m.group(1))
+
+    m = re.search(r'/search/[A-Z]{3}(\d{4})[A-Z]{3}(\d{4})\d+', href)
+    if not m:
+        return None, None
+
+    def ddmm_to_iso(ddmm: str) -> str | None:
+        try:
+            day, month = int(ddmm[:2]), int(ddmm[2:])
+            return f'{base_year}-{month:02d}-{day:02d}'
+        except Exception:
+            return None
+
+    return ddmm_to_iso(m.group(1)), ddmm_to_iso(m.group(2))
+
+
+def _parse_flex_ticket_block(block: str, currency: str, dep_date: str) -> dict | None:
+    # --- Tag / badge (inside <strong> before the ticket link) ---
+    tags: list[str] = []
+    # span closing > may be on its own line, so use [^>]* after data-test-id="text"
+    tag_m = re.search(r'<strong[^>]*>.*?data-test-id="text"[^>]*>([^<]+)<', block, re.DOTALL)
+    if tag_m:
+        t = tag_m.group(1).strip()
+        if t:
+            tags.append(t)
+
+    # --- Price ---
+    # Price value and closing > are on separate lines so allow \s* before closing <
+    price_match = re.search(r'data-test-id="price"[^>]*>([\d\s\u00a0\u202f\u200a\u2060]+[₽$€])\s*<', block)
+    price = parse_price(price_match.group(1)) if price_match else None
+
+    # --- Ticket link → departure + return dates ---
+    dep_date_parsed = dep_date
+    ret_date_parsed = None
+    # Find the <a> tag that contains flexible_ai-prices-ticket-link, then extract href
+    link_pos = block.find('data-test-id="flexible_ai-prices-ticket-link"')
+    if link_pos != -1:
+        a_start = block.rfind('<a', 0, link_pos)
+        a_end = block.find('>', link_pos)
+        if a_start != -1 and a_end != -1:
+            a_tag = block[a_start:a_end + 1]
+            href_m = re.search(r'href="([^"]+)"', a_tag)
+            if href_m:
+                d, r = _parse_flex_dates_from_href(href_m.group(1), dep_date)
+                if d:
+                    dep_date_parsed = d
+                if r:
+                    ret_date_parsed = r
+
+    # --- Airline (first <img alt="...">) ---
+    airline_m = re.search(r'<img\s+alt="([^"]+)"', block)
+    airlines = airline_m.group(1) if airline_m else None
+
+    # --- Times (HH:MM) — first two belong to the outbound leg ---
+    times = re.findall(r'\b(\d{2}:\d{2})\b', block)
+    dep_time = times[0] if len(times) > 0 else None
+    arr_time = times[1] if len(times) > 1 else None
+
+    # --- Duration (first occurrence = outbound leg) ---
+    duration = None
+    route_m = re.search(
+        r'([\d\u200a\u2060]+\u202f?ч[\u202f\s\u200a\u2060]*[\d\u200a\u2060]*[\u202f\s]*м?)\s*в\s*пути',
+        block,
+        re.IGNORECASE,
+    )
+    if route_m:
+        raw_dur = route_m.group(1).strip()
+        h_m = re.search(r'(\d+)\s*\S*ч', raw_dur)
+        m_m = re.search(r'(\d+)\s*\S*м', raw_dur)
+        if h_m and m_m:
+            duration = f"{h_m.group(1)}ч {m_m.group(1)}м"
+        elif h_m:
+            duration = f"{h_m.group(1)}ч"
+        else:
+            duration = re.sub(r'[\u200a\u2060\u202f\s]+', '', raw_dur)
+
+    # --- Stops (search whole block; flex page uses separate span for stop count) ---
+    stops = 0
+    is_direct = True
+    stops_m = re.search(r'(\d+)\s*пересад', block, re.IGNORECASE)
+    if stops_m:
+        stops = int(stops_m.group(1))
+        is_direct = False
+    elif re.search(r'без\s+пересад|прямой', block, re.IGNORECASE):
+        stops = 0
+        is_direct = True
+
+    return {
+        'price': price,
+        'currency': currency.upper(),
+        'source': 'av',
+        'tags': tags,
+        'airlines': airlines,
+        'is_direct': is_direct,
+        'stops': stops,
+        'departure': {'airport': None, 'date': dep_date_parsed, 'time': dep_time},
+        'arrival': {'airport': None, 'date': dep_date_parsed, 'time': arr_time},
+        'duration': duration,
+        'departure_date': dep_date_parsed,
+        'return_date': ret_date_parsed,
+    }
+
+
+def extract_flex_tickets_from_html(html: str, currency: str, dep_date: str) -> list[dict]:
+    blocks = _split_flex_ticket_blocks(html)
+    results = []
+    for block in blocks:
+        ticket = _parse_flex_ticket_block(block, currency, dep_date)
         if ticket and ticket['price']:
             results.append(ticket)
     results.sort(key=lambda f: f['price'] if f['price'] is not None else float('inf'))
@@ -202,8 +375,10 @@ async def scrape(
     ret_date: str | None,
     adults: int,
     currency: str,
+    dep_offset: int = 0,
+    ret_offset: int = 0,
 ) -> list[dict]:
-    url = build_url(origin, destination, dep_date, ret_date, adults, currency)
+    url = build_url(origin, destination, dep_date, ret_date, adults, currency, dep_offset, ret_offset)
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -224,16 +399,20 @@ async def scrape(
 
         await page.goto(url, wait_until='domcontentloaded')
         try:
-            await page.wait_for_selector('[data-test-id="ticket-preview"]', timeout=15000)
+            await page.wait_for_load_state('networkidle', timeout=25000)
         except Exception:
             pass
+        await asyncio.sleep(6)
 
         await page.evaluate("window.scrollTo(0, 400)")
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
 
         html = await page.content()
         await browser.close()
 
+    is_flex = dep_offset > 0 or (ret_date is not None and ret_offset > 0)
+    if is_flex:
+        return extract_flex_tickets_from_html(html, currency, dep_date)
     return extract_tickets_from_html(html, currency, dep_date)
 
 
@@ -251,8 +430,10 @@ def main():
     ret_date = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] != '-' else None
     adults = int(sys.argv[5]) if len(sys.argv) > 5 else 1
     currency = sys.argv[6].upper() if len(sys.argv) > 6 else 'RUB'
+    dep_offset = int(sys.argv[7]) if len(sys.argv) > 7 else 0
+    ret_offset = int(sys.argv[8]) if len(sys.argv) > 8 else 0
 
-    flights = asyncio.run(scrape(origin, destination, dep_date, ret_date, adults, currency))
+    flights = asyncio.run(scrape(origin, destination, dep_date, ret_date, adults, currency, dep_offset, ret_offset))
     print(json.dumps(flights, ensure_ascii=False))
 
 

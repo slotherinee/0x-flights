@@ -63,6 +63,9 @@ export interface FlightTicket {
   duration: string | null
   departureTime: string | null
   arrivalTime: string | null
+  // Set for flexible-date results where each ticket has its own dates
+  departureDate?: string
+  returnDate?: string
 }
 
 export interface NotificationJob {

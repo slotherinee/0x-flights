@@ -15,6 +15,8 @@ interface ScraperFlight {
   duration: string | null
   departure: { time: string | null }
   arrival: { time: string | null }
+  departure_date?: string | null
+  return_date?: string | null
 }
 
 export class AvProvider implements FlightProvider {
@@ -24,7 +26,9 @@ export class AvProvider implements FlightProvider {
     const currency = params.currency ?? 'RUB'
     const retDate = params.returnDate ?? '-'
     const adults = String(params.adults ?? 1)
-    const args = [params.origin, params.destination, params.departureDate, retDate, adults, currency]
+    const depOffset = String(params.departureOffset ?? 0)
+    const retOffset = String(params.returnOffset ?? 0)
+    const args = [params.origin, params.destination, params.departureDate, retDate, adults, currency, depOffset, retOffset]
 
     let stdout = ''
     let stderr = ''
@@ -68,6 +72,8 @@ export class AvProvider implements FlightProvider {
       duration: f.duration ?? null,
       departureTime: f.departure?.time ?? null,
       arrivalTime: f.arrival?.time ?? null,
+      departureDate: f.departure_date ?? undefined,
+      returnDate: f.return_date ?? undefined,
     }))
 
     return {

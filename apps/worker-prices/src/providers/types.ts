@@ -7,6 +7,8 @@ export interface FlightSearchParams {
   returnDate?: string | null
   adults?: number
   currency?: string
+  departureOffset?: number
+  returnOffset?: number
 }
 
 export interface FlightSearchResult {
