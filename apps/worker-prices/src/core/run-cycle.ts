@@ -37,6 +37,16 @@ function buildTicketUrl(tracker: Tracker): string | null {
   return `${base}/${tracker.origin}${dep}${tracker.destination}${adults}`
 }
 
+// ─── Concurrency helpers ──────────────────────────────────────────────────────
+
+async function runConcurrent(tasks: (() => Promise<void>)[], limit: number): Promise<void> {
+  let i = 0
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
+    while (i < tasks.length) await tasks[i++]!()
+  })
+  await Promise.all(workers)
+}
+
 // ─── Redis metrics ────────────────────────────────────────────────────────────
 
 const LAST_RUN_KEY = 'worker-prices:last-run'
@@ -60,6 +70,23 @@ async function saveMetrics(
     LAST_CYCLE_KEY,
     JSON.stringify({ durationMs, trackers: trackerCount, routes: queryCount, prices: priceCount, notifs: notifCount, cycleCount }),
   )
+}
+
+// ─── Price cache ──────────────────────────────────────────────────────────────
+
+type SearchResult = { lowestPrice: number; source: string; tickets: FlightTicket[] }
+
+const CACHE_PREFIX = 'prices:cache:'
+
+async function getCached(redis: Redis, key: string): Promise<SearchResult | null | undefined> {
+  const raw = await redis.get(CACHE_PREFIX + key)
+  if (raw === null) return undefined
+  if (raw === 'null') return null
+  try { return JSON.parse(raw) as SearchResult } catch { return undefined }
+}
+
+async function setCached(redis: Redis, key: string, result: SearchResult | null, ttl: number): Promise<void> {
+  await redis.set(CACHE_PREFIX + key, result === null ? 'null' : JSON.stringify(result), 'EX', ttl)
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -120,25 +147,16 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
   const userMap = await loadUserTelegramMap()
   const prevPrices = await getLastSentNotificationPrices(trackers.map((t) => t.id))
 
-  // Execute queries and process each tracker as soon as all its queries are ready
-  type SearchResult = { lowestPrice: number; source: string; tickets: FlightTicket[] }
+  const cacheTtl = env.PRICE_CACHE_TTL_SEC
+  const concurrency = env.SCRAPE_CONCURRENCY
   const queryResults = new Map<string, SearchResult | null>()
   const processedTrackers = new Set<number>()
   const priceRecords: PriceRecord[] = []
   let notifCount = 0
+  let cacheHits = 0
 
-  for (const [key, query] of queries) {
-    try {
-      const result = await provider.searchFlights({ ...query, currency: 'USD' })
-      queryResults.set(key, result ? { lowestPrice: result.lowestPrice, source: result.source, tickets: result.tickets ?? [] } : null)
-      if (result) console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} USD`)
-      else console.log(`[PriceWorker] No result for ${key}`)
-    } catch (err) {
-      console.error(`[PriceWorker] Search error for ${key}:`, err)
-      queryResults.set(key, null)
-    }
-
-    // Process any tracker whose queries are all complete
+  // Called after each query result is stored — processes any tracker whose queries are all complete
+  async function processCompletedTrackers() {
     for (const tracker of trackers) {
       if (processedTrackers.has(tracker.id)) continue
       const keys = trackerQueryKeys.get(tracker.id) ?? []
@@ -177,6 +195,36 @@ export async function runPriceCycle({ provider, redis, notifQueue }: RunPriceCyc
       }
     }
   }
+
+  // Execute queries in parallel (with concurrency limit), using Redis cache
+  const tasks = [...queries.entries()].map(([key, query]) => async () => {
+    const cached = await getCached(redis, key)
+    if (cached !== undefined) {
+      queryResults.set(key, cached)
+      cacheHits++
+      if (cached) console.log(`[PriceWorker] ${key} -> ${cached.lowestPrice} USD (cached)`)
+      else console.log(`[PriceWorker] No result for ${key} (cached)`)
+      await processCompletedTrackers()
+      return
+    }
+
+    try {
+      const result = await provider.searchFlights({ ...query, currency: 'USD' })
+      const sr: SearchResult | null = result ? { lowestPrice: result.lowestPrice, source: result.source, tickets: result.tickets ?? [] } : null
+      queryResults.set(key, sr)
+      await setCached(redis, key, sr, cacheTtl)
+      if (result) console.log(`[PriceWorker] ${key} -> ${result.lowestPrice} USD`)
+      else console.log(`[PriceWorker] No result for ${key}`)
+    } catch (err) {
+      console.error(`[PriceWorker] Search error for ${key}:`, err)
+      queryResults.set(key, null)
+    }
+
+    await processCompletedTrackers()
+  })
+
+  await runConcurrent(tasks, concurrency)
+  if (cacheHits > 0) console.log(`[PriceWorker] Cache hits: ${cacheHits}/${queries.size}`)
 
   if (priceRecords.length) {
     await insertPricesBatch(priceRecords)

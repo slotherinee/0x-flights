@@ -223,11 +223,13 @@ async def scrape(
         await page.add_init_script(STEALTH_SCRIPT)
 
         await page.goto(url, wait_until='domcontentloaded')
-        await page.wait_for_load_state('networkidle')
-        await asyncio.sleep(6)
+        try:
+            await page.wait_for_selector('[data-test-id="ticket-preview"]', timeout=15000)
+        except Exception:
+            pass
 
         await page.evaluate("window.scrollTo(0, 400)")
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
 
         html = await page.content()
         await browser.close()

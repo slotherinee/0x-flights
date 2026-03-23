@@ -119,15 +119,27 @@ export async function handleTextMessage(bot: TelegramBot, msg: TelegramBot.Messa
         )
         return
       }
+      const today = new Date().toISOString().slice(0, 10)
       const minDate = new Date()
       minDate.setDate(minDate.getDate() + 2)
-      if (parsed < minDate.toISOString().slice(0, 10)) {
+      const minDateStr = minDate.toISOString().slice(0, 10)
+      if (parsed < today) {
         await bot.sendMessage(
           chatId,
           lang === 'ru'
-            ? `❌ Дата слишком близко. Трекер можно создать минимум на послезавтра (${minDate.toISOString().slice(0, 10)}).`
-            : `❌ Date too soon. Tracker can only be created for the day after tomorrow or later (${minDate.toISOString().slice(0, 10)}).`,
-          { reply_markup: cancelKeyboard },
+            ? `❌ Эта дата уже прошла. Укажите дату в будущем, например: \`${minDateStr}\``
+            : `❌ This date has already passed. Please enter a future date, e.g. \`${minDateStr}\``,
+          { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
+        )
+        return
+      }
+      if (parsed < minDateStr) {
+        await bot.sendMessage(
+          chatId,
+          lang === 'ru'
+            ? `❌ Дата слишком близко. Трекер можно создать минимум на послезавтра (\`${minDateStr}\`).`
+            : `❌ Date too soon. Minimum date is the day after tomorrow (\`${minDateStr}\`).`,
+          { parse_mode: 'Markdown', reply_markup: cancelKeyboard },
         )
         return
       }

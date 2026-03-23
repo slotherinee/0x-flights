@@ -28,6 +28,8 @@ const envSchema = z.object({
   // Workers
   PRICE_WORKER_INTERVAL_MS: z.coerce.number().default(300_000),
   NOTIFICATION_RATE_LIMIT: z.coerce.number().default(10),
+  SCRAPE_CONCURRENCY: z.coerce.number().default(3),
+  PRICE_CACHE_TTL_SEC: z.coerce.number().default(7200),
 })
 
 export type Env = z.infer<typeof envSchema>

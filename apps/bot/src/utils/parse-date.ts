@@ -49,7 +49,12 @@ function smartYear(month: number, day: number): string | null {
   const candidate = toISO(year, month, day)
   if (!candidate) return null
   const today = now.toISOString().slice(0, 10)
-  return candidate > today ? candidate : toISO(year + 1, month, day)
+  if (candidate > today) return candidate
+  // Date has passed this year — if it was recent (< 30 days ago), return the past
+  // date so the bot can show a clear "already passed" error. If it passed long ago,
+  // the user likely means next year.
+  const daysAgo = Math.floor((now.getTime() - new Date(candidate).getTime()) / 86_400_000)
+  return daysAgo <= 30 ? candidate : toISO(year + 1, month, day)
 }
 
 /**
