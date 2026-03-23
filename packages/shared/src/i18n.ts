@@ -25,6 +25,8 @@ export function buildLocalizedNotificationMessage(
     ? `${job.departureDate} → ${job.returnDate}`
     : job.departureDate
 
+  const bookLine = job.ticketUrl ? `\n[🛒 ${lang === 'ru' ? 'Купить билет' : 'Book ticket'}](${job.ticketUrl})` : ''
+
   if (lang === 'ru') {
     const tripLabel = job.returnDate ? '🔄 Туда-обратно' : '✈️ В одну сторону'
     const diffLine =
@@ -37,8 +39,8 @@ export function buildLocalizedNotificationMessage(
       `📅 ${dateLabel}  ${tripLabel}\n` +
       `💰 Текущая цена: *${job.price} ${job.currency}*\n` +
       diffLine +
-      `🎯 Ваш порог: ${job.threshold} ${job.currency}\n\n` +
-      `Проверьте билет сейчас, цена может снова вырасти.`
+      `🎯 Ваш порог: ${job.threshold} ${job.currency}` +
+      bookLine
     )
   }
 
@@ -53,7 +55,7 @@ export function buildLocalizedNotificationMessage(
     `📅 ${dateLabel}  ${tripLabel}\n` +
     `💰 Current price: *${job.price} ${job.currency}*\n` +
     diffLine +
-    `🎯 Your threshold: ${job.threshold} ${job.currency}\n\n` +
-    `Book now before it goes back up!`
+    `🎯 Your threshold: ${job.threshold} ${job.currency}` +
+    bookLine
   )
 }

@@ -2,7 +2,25 @@ import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
 import { getActiveTrackers, insertPricesBatch, getLastSentNotificationPrices } from '@0x-flights/db'
 import type { NotificationJob, Tracker } from '@0x-flights/shared'
+import { env } from '@0x-flights/config'
 import type { FlightProvider } from '../providers'
+
+function dateToDDMM(date: string): string {
+  const parts = date.split('-')
+  return `${parts[2] ?? ''}${parts[1] ?? ''}`
+}
+
+function buildTicketUrl(tracker: Tracker): string | null {
+  const base = env.PROVIDER_SEARCH_BASE_URL
+  if (!base) return null
+  const dep = dateToDDMM(tracker.departureDate)
+  const adults = tracker.adults ?? 1
+  if (tracker.returnDate) {
+    const ret = dateToDDMM(tracker.returnDate)
+    return `${base}/${tracker.origin}${dep}${tracker.destination}${ret}${adults}`
+  }
+  return `${base}/${tracker.origin}${dep}${tracker.destination}${adults}`
+}
 import { groupTrackersByRoute } from './group-trackers'
 import { loadUserTelegramMap } from './load-user-map'
 import { convertUsdToCurrency, getUsdRates } from './fx-rates'
@@ -62,10 +80,12 @@ function toNotificationJob(
     destination: pending.tracker.destination,
     departureDate: pending.tracker.departureDate,
     returnDate: pending.tracker.returnDate,
+    adults: pending.tracker.adults,
     price: pending.price,
     currency: pending.currency,
     threshold: pending.tracker.priceThreshold,
     previousPrice,
+    ticketUrl: buildTicketUrl(pending.tracker),
   }
 }
 

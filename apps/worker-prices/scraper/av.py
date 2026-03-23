@@ -1,8 +1,8 @@
 """
-Aviasales scraper.
+Flight price scraper.
 
 Usage:
-  python aviasales.py <origin> <destination> <departure_date> [return_date|-] [adults] [currency]
+  python av.py <origin> <destination> <departure_date> [return_date|-] [adults] [currency]
 
 Args:
   origin           IATA code, e.g. MOW
@@ -17,16 +17,19 @@ Output:
   On error: exits with code 1, prints error to stderr.
 
 Examples:
-  python aviasales.py MOW LED 2026-06-15
-  python aviasales.py MOW KZN 2026-03-23 2026-03-29 1 RUB
+  python av.py MOW LED 2026-06-15
+  python av.py MOW KZN 2026-03-23 2026-03-29 1 RUB
 """
 
 import asyncio
 import re
 import json
+import os
 import sys
 from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
+
+PROVIDER_BASE_URL = os.environ.get('PROVIDER_SEARCH_BASE_URL', '')
 
 STEALTH_SCRIPT = """
 Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
@@ -44,10 +47,11 @@ def date_to_ddmm(date_str: str) -> str:
 
 def build_url(origin: str, destination: str, dep_date: str, ret_date: str | None, adults: int, currency: str) -> str:
     dep = date_to_ddmm(dep_date)
+    base = PROVIDER_BASE_URL.rstrip('/')
     if ret_date:
         ret = date_to_ddmm(ret_date)
-        return f"https://www.aviasales.ru/search/{origin}{dep}{destination}{ret}{adults}?currency={currency.lower()}"
-    return f"https://www.aviasales.ru/search/{origin}{dep}{destination}{adults}?currency={currency.lower()}"
+        return f"{base}/{origin}{dep}{destination}{ret}{adults}?currency={currency.lower()}"
+    return f"{base}/{origin}{dep}{destination}{adults}?currency={currency.lower()}"
 
 
 def parse_price(raw: str) -> float | None:
@@ -137,7 +141,7 @@ def _parse_ticket_block(block: str, currency: str, dep_date: str) -> dict | None
     arr_date = calc_arrival_date(dep_date, dep_time, arr_time)
 
     # --- Duration + stops ---
-    # Aviasales puts both in one text node: "1 ч 50 м в пути, прямой" or "1 ч 50 м в пути, 1 пересадка"
+    # Duration and stops are in one text node: "1 ч 50 м в пути, прямой" or "1 ч 50 м в пути, 1 пересадка"
     route_node = re.search(
         r'([\d\u200a\u2060]+\u202f?ч[\u202f\s\u200a\u2060]*[\d\u200a\u2060]*[\u202f\s]*м?)\s*в\s*пути[,\s]*(.*?)<',
         block,
@@ -180,7 +184,7 @@ def _parse_ticket_block(block: str, currency: str, dep_date: str) -> dict | None
     return {
         'price': price,
         'currency': currency.upper(),
-        'source': 'aviasales',
+        'source': 'av',
         'tags': tags,
         'airlines': airlines,
         'is_direct': is_direct,
@@ -234,7 +238,7 @@ async def scrape(
 def main():
     if len(sys.argv) < 4:
         print(
-            "Usage: aviasales.py <origin> <destination> <departure_date> [return_date|-] [adults] [currency]",
+            "Usage: av.py <origin> <destination> <departure_date> [return_date|-] [adults] [currency]",
             file=sys.stderr,
         )
         sys.exit(1)

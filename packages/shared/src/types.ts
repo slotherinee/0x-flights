@@ -60,10 +60,12 @@ export interface NotificationJob {
   destination: string
   departureDate: string
   returnDate: string | null
+  adults: number
   price: number
   currency: string
   threshold: number
   previousPrice?: number | null
+  ticketUrl: string | null
 }
 
 export interface CreateTrackerDto {

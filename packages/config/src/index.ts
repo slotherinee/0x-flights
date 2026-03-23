@@ -22,7 +22,8 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z.string().default('secret123'),
 
   // Flight provider
-  FLIGHT_PROVIDER: z.enum(['stub', 'google']).default('stub'),
+  FLIGHT_PROVIDER: z.enum(['stub', 'google', 'av']).default('stub'),
+  PROVIDER_SEARCH_BASE_URL: z.string().default(''),
 
   // Workers
   PRICE_WORKER_INTERVAL_MS: z.coerce.number().default(300_000),
