@@ -1,5 +1,6 @@
 export { createTrackerByTelegram } from './create-tracker'
 export { listTrackersByTelegramId } from './list-trackers'
 export { deleteTrackerByTelegramId } from './delete-tracker'
+export { updateTrackerByTelegramId } from './update-tracker'
 export { getUserLanguageByTelegramId, setUserLanguageByTelegramId } from './user-language'
 export { getUserCurrencyByTelegramId, setUserCurrencyByTelegramId } from './user-currency'

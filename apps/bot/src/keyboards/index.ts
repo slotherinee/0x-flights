@@ -73,3 +73,21 @@ export const deleteConfirmKeyboard = (id: number): TelegramBot.InlineKeyboardMar
     ],
   ],
 })
+
+export const editFieldKeyboard = (id: number, lang: 'en' | 'ru'): TelegramBot.InlineKeyboardMarkup => ({
+  inline_keyboard: [
+    [
+      { text: lang === 'ru' ? '✈️ Откуда' : '✈️ Origin', callback_data: `edit_field:${id}:origin` },
+      { text: lang === 'ru' ? '✈️ Куда' : '✈️ Destination', callback_data: `edit_field:${id}:destination` },
+    ],
+    [
+      { text: lang === 'ru' ? '📅 Дата вылета' : '📅 Departure', callback_data: `edit_field:${id}:departureDate` },
+      { text: lang === 'ru' ? '📅 Дата возврата' : '📅 Return', callback_data: `edit_field:${id}:returnDate` },
+    ],
+    [
+      { text: lang === 'ru' ? '👤 Пассажиры' : '👤 Passengers', callback_data: `edit_field:${id}:adults` },
+      { text: lang === 'ru' ? '💰 Порог' : '💰 Threshold', callback_data: `edit_field:${id}:priceThreshold` },
+    ],
+    [{ text: '❌ Cancel', callback_data: 'cancel' }],
+  ],
+})

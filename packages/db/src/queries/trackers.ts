@@ -1,7 +1,7 @@
 import { eq, and, gte, lte, desc, sql } from 'drizzle-orm'
 import { getDb } from '../client'
 import { trackers } from '../schema'
-import type { Tracker, TrackerResponse, CreateTrackerDto } from '@0x-flights/shared'
+import type { Tracker, TrackerResponse, CreateTrackerDto, UpdateTrackerDto } from '@0x-flights/shared'
 
 type Row = typeof trackers.$inferSelect
 
@@ -90,6 +90,29 @@ export async function expirePreDepartureTrackers(): Promise<number> {
     .where(and(eq(trackers.isActive, true), lte(trackers.departureDate, tomorrowStr)))
     .returning({ id: trackers.id })
   return result.length
+}
+
+export async function updateTracker(
+  id: number,
+  userId: number,
+  updates: UpdateTrackerDto,
+): Promise<Tracker | null> {
+  const set: Record<string, unknown> = {}
+  if (updates.origin !== undefined) set['origin'] = updates.origin.toUpperCase()
+  if (updates.destination !== undefined) set['destination'] = updates.destination.toUpperCase()
+  if (updates.departureDate !== undefined) set['departureDate'] = updates.departureDate
+  if ('returnDate' in updates) set['returnDate'] = updates.returnDate ?? null
+  if (updates.priceThreshold !== undefined) set['priceThreshold'] = String(updates.priceThreshold)
+  if (updates.adults !== undefined) set['adults'] = updates.adults
+  if (updates.departureOffset !== undefined) set['departureOffset'] = updates.departureOffset
+  if (updates.returnOffset !== undefined) set['returnOffset'] = updates.returnOffset
+  if (Object.keys(set).length === 0) return null
+  const result = await getDb()
+    .update(trackers)
+    .set(set)
+    .where(and(eq(trackers.id, id), eq(trackers.userId, userId), eq(trackers.isActive, true)))
+    .returning()
+  return result[0] ? toTracker(result[0]) : null
 }
 
 export async function softDeleteTracker(id: number, userId: number): Promise<boolean> {

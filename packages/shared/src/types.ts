@@ -99,3 +99,14 @@ export interface CreateTrackerDto {
   departureOffset?: number
   returnOffset?: number
 }
+
+export interface UpdateTrackerDto {
+  origin?: string
+  destination?: string
+  departureDate?: string
+  returnDate?: string | null
+  priceThreshold?: number
+  adults?: number
+  departureOffset?: number
+  returnOffset?: number
+}

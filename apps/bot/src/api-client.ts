@@ -3,7 +3,7 @@
  * Bot contains ZERO business logic — only calls the API.
  */
 import { env } from '@0x-flights/config'
-import type { CreateTrackerDto, TrackerResponse, UserCurrency, UserLanguage } from '@0x-flights/shared'
+import type { CreateTrackerDto, UpdateTrackerDto, TrackerResponse, UserCurrency, UserLanguage } from '@0x-flights/shared'
 
 const BASE = process.env['API_BASE_URL'] ?? `http://localhost:${env.API_PORT}`
 
@@ -25,6 +25,12 @@ export const apiListTrackers = (telegramId: string) =>
 
 export const apiDeleteTracker = (id: number, telegramId: string) =>
   req(`/trackers/${id}?telegramId=${encodeURIComponent(telegramId)}`, { method: 'DELETE' })
+
+export const apiUpdateTracker = (id: number, updates: UpdateTrackerDto, telegramId: string) =>
+  req<TrackerResponse>(`/trackers/${id}?telegramId=${encodeURIComponent(telegramId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates),
+  })
 
 export const apiGetUserLanguage = async (telegramId: string): Promise<UserLanguage | null> => {
   const res = await req<{ language: UserLanguage | null }>(

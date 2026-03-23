@@ -2,7 +2,7 @@ import type TelegramBot from 'node-telegram-bot-api'
 import type { UserCurrency } from '@0x-flights/shared'
 import { isSupportedCurrency, SUPPORTED_CURRENCIES } from '@0x-flights/shared'
 import { clearState, setState } from '../state/conversation'
-import { currencyKeyboard, deleteConfirmKeyboard, languageKeyboard } from '../keyboards'
+import { currencyKeyboard, deleteConfirmKeyboard, editFieldKeyboard, languageKeyboard } from '../keyboards'
 import {
   apiDeleteTracker,
   apiGetUserCurrency,
@@ -20,6 +20,7 @@ function welcomeText(lang: 'en' | 'ru'): string {
       `Я отслеживаю цены на перелеты и присылаю уведомление при снижении.\n\n` +
       `/track — создать трекер\n` +
       `/list — ваши трекеры\n` +
+      `/edit — изменить трекер\n` +
       `/delete — удалить трекер\n` +
       `/lang — сменить язык RU/EN\n` +
       `/curr — сменить валюту USD/EUR/RUB/GBP\n` +
@@ -32,6 +33,7 @@ function welcomeText(lang: 'en' | 'ru'): string {
     `I track flight prices and alert you when they drop.\n\n` +
     `/track — create a price alert\n` +
     `/list — view your trackers\n` +
+    `/edit — edit a tracker\n` +
     `/delete — remove a tracker\n` +
     `/lang — toggle RU/EN\n` +
     `/curr — set currency USD/EUR/RUB/GBP\n` +
@@ -266,4 +268,48 @@ export async function handleDeleteConfirm(
       message_id: msgId,
     })
   }
+}
+
+export async function handleEdit(bot: TelegramBot, msg: TelegramBot.Message) {
+  const telegramId = String(msg.from!.id)
+  const lang = (await apiGetUserLanguage(telegramId)) ?? 'en'
+  const trackers = await apiListTrackers(telegramId)
+  if (!trackers.length) {
+    await bot.sendMessage(
+      msg.chat.id,
+      lang === 'ru'
+        ? 'Нет активных трекеров. Используйте /track, чтобы создать.'
+        : 'No active trackers. Use /track to create one.',
+    )
+    return
+  }
+  const buttons = trackers.map((t) => [
+    {
+      text: `#${t.id} ${t.origin}→${t.destination} ${t.departureDate}`,
+      callback_data: `edit_ask:${t.id}`,
+    },
+  ])
+  buttons.push([{ text: '❌ Cancel', callback_data: 'cancel' }])
+  await bot.sendMessage(msg.chat.id, lang === 'ru' ? '✏️ *Какой трекер отредактировать?*' : '✏️ *Which tracker to edit?*', {
+    parse_mode: 'Markdown',
+    reply_markup: { inline_keyboard: buttons },
+  })
+}
+
+export async function handleEditAsk(
+  bot: TelegramBot,
+  chatId: number,
+  trackerId: number,
+  lang: 'en' | 'ru',
+  msgId: number,
+) {
+  await bot.editMessageText(
+    lang === 'ru' ? `✏️ *Что хотите изменить? (трекер #${trackerId})*` : `✏️ *What to edit? (tracker #${trackerId})*`,
+    {
+      chat_id: chatId,
+      message_id: msgId,
+      parse_mode: 'Markdown',
+      reply_markup: editFieldKeyboard(trackerId, lang),
+    },
+  )
 }

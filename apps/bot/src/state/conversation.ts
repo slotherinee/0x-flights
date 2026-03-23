@@ -16,10 +16,11 @@ export type TrackStep =
   | 'AWAITING_RET_FLEXIBILITY'
   | 'AWAITING_PASSENGERS'
   | 'AWAITING_THRESHOLD'
+  | 'AWAITING_EDIT_VALUE'
 
 export interface ConversationState {
   step: TrackStep
-  intent?: 'start' | 'track'
+  intent?: 'start' | 'track' | 'edit'
   lang?: 'en' | 'ru'
   currency?: 'USD' | 'EUR' | 'RUB' | 'GBP'
   origin?: string
@@ -32,6 +33,8 @@ export interface ConversationState {
   departureOffset?: number
   returnOffset?: number
   adults?: number
+  editTrackerId?: number
+  editField?: 'origin' | 'destination' | 'departureDate' | 'returnDate' | 'priceThreshold' | 'adults'
 }
 
 const TTL = 600 // 10 minutes

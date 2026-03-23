@@ -1,8 +1,8 @@
 import type TelegramBot from 'node-telegram-bot-api'
 import { isSupportedCurrency } from '@0x-flights/shared'
 import { clearState, getState, setState } from '../state/conversation'
-import { cancelKeyboard, currencyKeyboard, passengersKeyboard } from '../keyboards'
-import { handleDeleteAsk, handleDeleteConfirm } from './commands'
+import { cancelKeyboard, currencyKeyboard, passengersKeyboard, flexibilityKeyboard } from '../keyboards'
+import { handleDeleteAsk, handleDeleteConfirm, handleEditAsk } from './commands'
 import { examples } from '../utils'
 import { apiGetUserLanguage, apiSetUserCurrency, apiSetUserLanguage } from '../api-client'
 
@@ -154,9 +154,32 @@ export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.C
   // passengers selection
   if (data.startsWith('pax:')) {
     const state = await getState(chatId)
-    if (!state || state.step !== 'AWAITING_PASSENGERS') return
+    if (!state || (state.step !== 'AWAITING_PASSENGERS' && state.step !== 'AWAITING_EDIT_VALUE')) return
     const lang = state.lang ?? 'en'
     const adults = parseInt(data.split(':')[1] ?? '1', 10)
+
+    // Edit flow
+    if (state.intent === 'edit' && state.editTrackerId) {
+      const { apiUpdateTracker } = await import('../api-client')
+      try {
+        await apiUpdateTracker(state.editTrackerId, { adults }, telegramId)
+        await clearState(chatId)
+        await bot.editMessageText(
+          lang === 'ru'
+            ? `✅ Трекер обновлен!\n👤 Пассажиры: *${adults}*`
+            : `✅ Tracker updated!\n👤 Passengers: *${adults}*`,
+          { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown' },
+        )
+      } catch (e) {
+        await bot.editMessageText(
+          lang === 'ru' ? `❌ Ошибка: ${(e as Error).message}` : `❌ Error: ${(e as Error).message}`,
+          { chat_id: chatId, message_id: msgId },
+        )
+      }
+      return
+    }
+
+    // Track flow
     const currency = state.currency ?? 'USD'
     await setState(chatId, { ...state, step: 'AWAITING_THRESHOLD', adults })
     await bot.editMessageText(
@@ -165,6 +188,54 @@ export async function handleCallbackQuery(bot: TelegramBot, query: TelegramBot.C
         : `👤 Passengers: *${adults}*\n\n💰 Enter *max price in ${currency}* (e.g. \`350\`):`,
       { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: cancelKeyboard },
     )
+    return
+  }
+
+  // edit flow
+  if (data.startsWith('edit_ask:')) {
+    const trackerId = Number(data.split(':')[1])
+    const lang = (await apiGetUserLanguage(telegramId)) ?? 'en'
+    await handleEditAsk(bot, chatId, trackerId, lang, msgId)
+    return
+  }
+
+  if (data.startsWith('edit_field:')) {
+    const parts = data.split(':')
+    const trackerId = Number(parts[1])
+    const field = parts[2] as 'origin' | 'destination' | 'departureDate' | 'returnDate' | 'priceThreshold' | 'adults'
+    const state = await getState(chatId)
+    const lang = state?.lang ?? (await apiGetUserLanguage(telegramId)) ?? 'en'
+
+    if (field === 'adults') {
+      // Show passengers keyboard directly for adults field
+      await setState(chatId, { step: 'AWAITING_EDIT_VALUE', intent: 'edit', lang, editTrackerId: trackerId, editField: 'adults' })
+      await bot.editMessageText(
+        lang === 'ru' ? `👤 Сколько пассажиров? (трекер #${trackerId})` : `👤 How many passengers? (tracker #${trackerId})`,
+        {
+          chat_id: chatId,
+          message_id: msgId,
+          parse_mode: 'Markdown',
+          reply_markup: passengersKeyboard(lang),
+        },
+      )
+      return
+    }
+
+    // For other fields, ask for text input
+    const prompts: Record<string, string> = {
+      origin: lang === 'ru' ? `✈️ Укажите новый город отправления (трекер #${trackerId}):` : `✈️ Enter new origin city (tracker #${trackerId}):`,
+      destination: lang === 'ru' ? `✈️ Укажите новый город прибытия (трекер #${trackerId}):` : `✈️ Enter new destination city (tracker #${trackerId}):`,
+      departureDate: lang === 'ru' ? `📅 Укажите новую дату вылета (трекер #${trackerId}):` : `📅 Enter new departure date (tracker #${trackerId}):`,
+      returnDate: lang === 'ru' ? `📅 Укажите новую дату возврата (трекер #${trackerId}):` : `📅 Enter new return date (tracker #${trackerId}):`,
+      priceThreshold: lang === 'ru' ? `💰 Укажите новый порог цены в ${state?.currency ?? 'USD'} (трекер #${trackerId}):` : `💰 Enter new price threshold in ${state?.currency ?? 'USD'} (tracker #${trackerId}):`,
+    }
+
+    await setState(chatId, { step: 'AWAITING_EDIT_VALUE', intent: 'edit', lang, editTrackerId: trackerId, editField: field })
+    await bot.editMessageText(prompts[field] ?? 'Enter value:', {
+      chat_id: chatId,
+      message_id: msgId,
+      reply_markup: cancelKeyboard,
+    })
     return
   }
 

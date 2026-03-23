@@ -4,6 +4,7 @@ import {
   createTrackerByTelegram,
   listTrackersByTelegramId,
   deleteTrackerByTelegramId,
+  updateTrackerByTelegramId,
   getUserLanguageByTelegramId,
   setUserLanguageByTelegramId,
   getUserCurrencyByTelegramId,
@@ -114,6 +115,28 @@ export const trackerRoutes = new Elysia({ prefix: '/trackers' })
       return listTrackersByTelegramId(telegramId)
     },
     { query: t.Object({ telegramId: t.Optional(t.String()) }) },
+  )
+
+  .patch(
+    '/:id',
+    async ({ params, query, body, set }) => {
+      const telegramId = requireTelegramId(query)
+      if (!telegramId) {
+        set.status = 400
+        return { error: 'telegramId query param required' }
+      }
+
+      const result = await updateTrackerByTelegramId(Number(params.id), telegramId, body as Record<string, unknown>)
+      if (!result.ok) {
+        set.status = 404
+        return {
+          error: result.reason === 'USER_NOT_FOUND' ? 'User not found' : 'Tracker not found',
+        }
+      }
+
+      return result.tracker
+    },
+    { query: t.Object({ telegramId: t.Optional(t.String()) }), body: t.Any() },
   )
 
   .delete(

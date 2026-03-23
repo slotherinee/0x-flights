@@ -8,6 +8,7 @@ import {
   handleTrack,
   handleCancel,
   handleList,
+  handleEdit,
   handleDelete,
 } from './handlers/commands'
 import { handleTextMessage } from './handlers/messages'
@@ -22,6 +23,7 @@ bot.onText(/^\/curr(?:\s+\S+)?/, (msg) => handleCurr(bot, msg).catch(console.err
 bot.onText(/^\/track/, (msg) => handleTrack(bot, msg).catch(console.error))
 bot.onText(/^\/cancel/, (msg) => handleCancel(bot, msg).catch(console.error))
 bot.onText(/^\/list/, (msg) => handleList(bot, msg).catch(console.error))
+bot.onText(/^\/edit/, (msg) => handleEdit(bot, msg).catch(console.error))
 bot.onText(/^\/delete/, (msg) => handleDelete(bot, msg).catch(console.error))
 
 bot.on('message', (msg) => {
