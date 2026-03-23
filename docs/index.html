@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>0x-flights — Умный мониторинг цен на авиабилеты</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +20,7 @@
             <ul class="nav-links">
                 <li><a href="#how">Как работает</a></li>
                 <li><a href="#features">Возможности</a></li>
+                <li><a href="#history">История</a></li>
                 <li><a href="#commands">Команды</a></li>
                 <li><a href="#faq">FAQ</a></li>
             </ul>
@@ -299,6 +300,95 @@
         </div>
     </section>
 
+    <!-- PRICE HISTORY CHART -->
+    <section class="history-section" id="history">
+        <div class="container">
+            <div class="history-layout">
+                <div class="history-text js-reveal-left">
+                    <div class="section-tag">История</div>
+                    <h2 class="section-title">Цена за неделю —<br>как на ладони</h2>
+                    <p>Бот записывает цену при каждой проверке и строит историю. Команда <code>/history</code> покажет весь путь от старта — видишь тренд, знаешь когда брать.</p>
+                    <ul class="check-list">
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Минимум, максимум и текущая цена
+                        </li>
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Уведомление точно в момент снижения
+                        </li>
+                        <li>
+                            <span class="check-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            Видишь тренд — понимаешь, когда покупать
+                        </li>
+                    </ul>
+                </div>
+                <div class="history-visual js-reveal-right delay-1">
+                    <div class="chart-card">
+                        <div class="chart-card-head">
+                            <div class="chart-route-info">
+                                <span class="iata">MOW</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                                <span class="iata">BCN</span>
+                            </div>
+                            <span class="chart-range-label">17–23 марта</span>
+                        </div>
+                        <div class="chart-body-wrap">
+                            <div class="chart-y-labels">
+                                <span>28к</span>
+                                <span>24к</span>
+                                <span>20к</span>
+                                <span>16к</span>
+                            </div>
+                            <div class="chart-svg-outer">
+                                <svg class="price-chart-svg" viewBox="0 0 280 110" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id="chartAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#1668dc" stop-opacity="0.18"/>
+                                            <stop offset="100%" stop-color="#1668dc" stop-opacity="0.02"/>
+                                        </linearGradient>
+                                        <clipPath id="chartRevealClip">
+                                            <rect id="chartRevealRect" x="0" y="0" width="0" height="110"/>
+                                        </clipPath>
+                                    </defs>
+                                    <line x1="0" y1="10" x2="280" y2="10" class="c-grid"/>
+                                    <line x1="0" y1="40" x2="280" y2="40" class="c-grid"/>
+                                    <line x1="0" y1="70" x2="280" y2="70" class="c-grid"/>
+                                    <line x1="0" y1="100" x2="280" y2="100" class="c-grid"/>
+                                    <path d="M10,33 L53,27 L97,38 L140,33 L183,38 L227,49 L270,83 L270,105 L10,105 Z"
+                                          fill="url(#chartAreaGrad)"
+                                          clip-path="url(#chartRevealClip)"/>
+                                    <path id="chartLinePath"
+                                          d="M10,33 L53,27 L97,38 L140,33 L183,38 L227,49 L270,83"
+                                          fill="none"
+                                          class="chart-line-path"
+                                          clip-path="url(#chartRevealClip)"/>
+                                    <circle cx="10"  cy="33" r="3.5" class="c-dot" id="cd0" opacity="0"/>
+                                    <circle cx="53"  cy="27" r="3.5" class="c-dot" id="cd1" opacity="0"/>
+                                    <circle cx="97"  cy="38" r="3.5" class="c-dot" id="cd2" opacity="0"/>
+                                    <circle cx="140" cy="33" r="3.5" class="c-dot" id="cd3" opacity="0"/>
+                                    <circle cx="183" cy="38" r="3.5" class="c-dot" id="cd4" opacity="0"/>
+                                    <circle cx="227" cy="49" r="3.5" class="c-dot" id="cd5" opacity="0"/>
+                                    <circle cx="270" cy="83" r="5"   class="c-dot c-dot-last" id="cd6" opacity="0"/>
+                                </svg>
+                                <div class="chart-drop-badge" id="chartDropBadge">🔥 −26%</div>
+                            </div>
+                        </div>
+                        <div class="chart-x-labels">
+                            <span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23 мар</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- BOT COMMANDS -->
     <section class="commands-section" id="commands">
         <div class="container">
@@ -356,6 +446,62 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLEXIBLE DATES -->
+    <section class="flex-dates-section" id="flexible">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-tag">Гибкость</div>
+                <h2 class="section-title">±N дней — больше шансов<br>найти дешёвый билет</h2>
+                <p class="section-sub">Укажи допустимый разброс дат — бот проверит все варианты в окне и пришлёт уведомление по самой низкой цене.</p>
+            </div>
+            <button class="fd-rescan-btn" id="fdRescanBtn">🔍 Найти лучшую цену</button>
+            <div class="flex-dates-grid" id="flexDatesGrid">
+                <div class="fd-cell fd-offset" data-fdidx="0">
+                    <div class="fd-weekday">вт</div>
+                    <div class="fd-num">12</div>
+                    <div class="fd-price">6 200 ₽</div>
+                </div>
+                <div class="fd-cell fd-offset" data-fdidx="1">
+                    <div class="fd-weekday">ср</div>
+                    <div class="fd-num">13</div>
+                    <div class="fd-price">5 800 ₽</div>
+                </div>
+                <div class="fd-cell fd-offset" data-fdidx="2">
+                    <div class="fd-weekday">чт</div>
+                    <div class="fd-num">14</div>
+                    <div class="fd-price">5 400 ₽</div>
+                </div>
+                <div class="fd-cell fd-target" data-fdidx="3">
+                    <div class="fd-badge-top">цель</div>
+                    <div class="fd-weekday">пт</div>
+                    <div class="fd-num">15</div>
+                    <div class="fd-price">4 900 ₽</div>
+                </div>
+                <div class="fd-cell fd-best" data-fdidx="4">
+                    <div class="fd-badge-top">🏆 лучшая</div>
+                    <div class="fd-weekday">сб</div>
+                    <div class="fd-num">16</div>
+                    <div class="fd-price">3 800 ₽</div>
+                </div>
+                <div class="fd-cell fd-offset" data-fdidx="5">
+                    <div class="fd-weekday">вс</div>
+                    <div class="fd-num">17</div>
+                    <div class="fd-price">5 100 ₽</div>
+                </div>
+                <div class="fd-cell fd-offset" data-fdidx="6">
+                    <div class="fd-weekday">пн</div>
+                    <div class="fd-num">18</div>
+                    <div class="fd-price">5 600 ₽</div>
+                </div>
+            </div>
+            <div class="fd-legend">
+                <span class="fd-legend-item fd-legend-target"><span></span>Целевая дата</span>
+                <span class="fd-legend-item fd-legend-offset"><span></span>±3 дня</span>
+                <span class="fd-legend-item fd-legend-best"><span></span>Лучшая цена</span>
             </div>
         </div>
     </section>
@@ -459,6 +605,47 @@
         </div>
     </section>
 
+    <!-- MULTI-CURRENCY -->
+    <section class="currency-section" id="currency">
+        <div class="container">
+            <div class="currency-layout">
+                <div class="currency-text js-reveal-left">
+                    <div class="section-tag">Валюта</div>
+                    <h2 class="section-title">Цены в удобной<br>для тебя валюте</h2>
+                    <p>Выбери ₽, $, € или £ — бот покажет актуальную цену с конвертацией по свежему курсу. Курс обновляется каждые 48 часов автоматически.</p>
+                    <div class="cur-btn-group" id="currencyBtns">
+                        <button class="cur-btn active" data-cur="RUB">₽ Рубль</button>
+                        <button class="cur-btn" data-cur="USD">$ Доллар</button>
+                        <button class="cur-btn" data-cur="EUR">€ Евро</button>
+                        <button class="cur-btn" data-cur="GBP">£ Фунт</button>
+                    </div>
+                </div>
+                <div class="currency-visual js-reveal-right delay-1">
+                    <div class="cur-card">
+                        <div class="cur-card-route">
+                            <span class="iata">MOW</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                            <span class="iata">AER</span>
+                            <span class="cur-card-date">· 3 июля</span>
+                        </div>
+                        <div class="cur-price-display">
+                            <span class="cur-price-old" id="curOldPrice">12 800 <span class="cur-price-sym">₽</span></span>
+                            <div class="cur-price-main">
+                                <span class="cur-price-num" id="curPriceNum">8 450</span>
+                                <span class="cur-price-sym2" id="curPriceSym">₽</span>
+                            </div>
+                        </div>
+                        <div class="cur-savings">
+                            <span class="pct-badge">−34%</span>
+                            <span class="cur-save-text" id="curSaveText">Экономия: −4 350 ₽</span>
+                        </div>
+                        <div class="cur-rate-note" id="curRateNote">Курс ЦБ · обновлено сегодня</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- FAQ -->
     <section class="faq-section" id="faq">
         <div class="container">
@@ -535,6 +722,8 @@
                 <nav class="footer-nav">
                     <a href="#how">Как работает</a>
                     <a href="#features">Возможности</a>
+                    <a href="#history">История</a>
+                    <a href="#flexible">Гибкие даты</a>
                     <a href="#commands">Команды</a>
                     <a href="#faq">FAQ</a>
                     <a href="https://t.me/oxflights_bot" target="_blank" rel="noopener">Бот в Telegram</a>
