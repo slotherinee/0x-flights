@@ -43,12 +43,7 @@ export const passengersKeyboard = (lang: 'en' | 'ru'): TelegramBot.InlineKeyboar
       { text: '2', callback_data: 'pax:2' },
       { text: '3', callback_data: 'pax:3' },
       { text: '4', callback_data: 'pax:4' },
-    ],
-    [
       { text: '5', callback_data: 'pax:5' },
-      { text: '6', callback_data: 'pax:6' },
-      { text: '7', callback_data: 'pax:7' },
-      { text: '8', callback_data: 'pax:8' },
     ],
     [{ text: '❌ Cancel', callback_data: 'cancel' }],
   ],

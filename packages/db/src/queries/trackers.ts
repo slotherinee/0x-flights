@@ -51,11 +51,13 @@ export async function getTrackersByUserId(userId: number): Promise<TrackerRespon
       latestPrice: sql<string | null>`(
         SELECT p.price::text FROM prices p
         WHERE p.tracker_id = ${trackers.id}
+        AND p.fetched_at >= ${trackers.createdAt}
         ORDER BY p.fetched_at DESC LIMIT 1
       )`,
       latestPriceCurrency: sql<string | null>`(
         SELECT p.currency FROM prices p
         WHERE p.tracker_id = ${trackers.id}
+        AND p.fetched_at >= ${trackers.createdAt}
         ORDER BY p.fetched_at DESC LIMIT 1
       )`,
     })
